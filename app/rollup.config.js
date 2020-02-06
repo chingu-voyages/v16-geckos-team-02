@@ -3,6 +3,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
+import replace from '@rollup/plugin-replace'; // to inject env varibles
+import dotenv from 'dotenv'; 
+dotenv.config(); // to read the .env file
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -46,7 +49,16 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+		replace({
+			process: JSON.stringify({
+				env: {
+					/* put enviroment varibles here, access eg MY_API_KEY with process.env.MY_API_KEY : */
+					// MY_API_KEY: KEY
+				}
+			}),
+			
+		})
 	],
 	watch: {
 		clearScreen: false
