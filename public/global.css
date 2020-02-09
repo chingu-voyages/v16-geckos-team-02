@@ -64,3 +64,8 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+
+textarea{
+	width: 200px;
+	height: 150px;
+}
