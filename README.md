@@ -9,4 +9,10 @@ cd app
 npm install 
 npm run dev
 ```
-Go to `http://localhost:5000/` in web browser 
+Go to `http://localhost:5000/` in web browser
+
+## live demo
+### development
+https://v16-geckos-2-sandbox.netlify.com/
+### master
+https://v16-geckos-2-production.netlify.com/ 
