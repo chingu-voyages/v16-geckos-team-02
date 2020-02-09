@@ -518,7 +518,7 @@ var app = (function () {
             ]
         }
     ]);
-    const tempData = writable('no widgets yet, add one from widget menu'); // just for example purposes until we can get dashBoards to update
+    const tempData = writable('try deleting all this text and see the component change from textarea to input'); // just for example purposes until we can get dashBoards to update
 
     const activeDash = derived( // **
     	[dashBoards, activeDashIndex],
