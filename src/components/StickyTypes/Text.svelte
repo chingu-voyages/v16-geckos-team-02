@@ -6,5 +6,5 @@
 <textarea type="text" bind:value={$data}></textarea>
 
 <style>
-	
+
 </style>

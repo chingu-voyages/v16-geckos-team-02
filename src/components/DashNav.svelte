@@ -1,5 +1,5 @@
 <script>
-    import { dashTitle, activeDash } from './dataStore.js';
+    import { dashTitle, activeDash } from '../dataStore';
     let dashBoards;
 </script>
 
@@ -8,5 +8,5 @@
 </nav>
 
 <style>
-	
+
 </style>

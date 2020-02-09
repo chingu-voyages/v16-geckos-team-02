@@ -2,13 +2,13 @@
     import { beforeUpdate } from 'svelte';
     import Widget from './Widget.svelte';
     import Text from './StickyTypes/Text.svelte';
-    import detectInputType from './utils/detectInputType.js';
+    import detectInputType from '../utils/detectInputType.js';
     export let title;
     export let data;
 
     let type;
     beforeUpdate(() => {
-		type = detectInputType($data);
+		  type = detectInputType($data);
 	});
 </script>
 
@@ -21,7 +21,7 @@
 </Widget>
 
 <style>
-	
+
 </style>
 
 <!-- https://svelte.dev/tutorial/text-inputs -->
