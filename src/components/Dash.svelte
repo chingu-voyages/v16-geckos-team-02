@@ -1,17 +1,13 @@
 <script>
     import { getActiveDash } from '../dataStore';
-    import Sticky from './widgets/Sticky.svelte';
+    import Widget from './widgets/Widget.svelte';
     let dashData = getActiveDash();
-    let widgets = dashData ? dashData.widgets : [];
+    let widgets = dashData ? Array.from(dashData.widgets.keys()) : [];
 </script>
 
 <section>
-    {#each Object.keys(widgets) as ref}
-        {#if widgets[ref].type === 'Sticky'}
-            <Sticky {ref} />
-            {:else}
-            <div>{widgets[ref].type} not yet implemented</div>
-        {/if}
+    {#each widgets as ref}
+            <Widget {ref} />
     {/each}
 </section>
 

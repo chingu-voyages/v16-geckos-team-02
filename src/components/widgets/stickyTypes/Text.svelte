@@ -1,9 +1,9 @@
 
 <script>
-	// TODO import bindable data 
+	export let _data;
 </script>
 
-<textarea></textarea>
+<textarea bind:value={$_data}></textarea>
 
 <style>
 

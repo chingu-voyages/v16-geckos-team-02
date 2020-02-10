@@ -1,11 +1,11 @@
 <script>
-    import {dashboardsList, activeDash } from '../dataStore';
-    
-    // TODO get title from dataStore and bind to input
+    import { getActiveDash } from '../dataStore';
+    let _title = getActiveDash()._title;
+    // TODO bind title from dataStore to an input
 </script>
 
 <nav>
-    <h1>dash title</h1>
+    <h1>{$_title}</h1>
 </nav>
 
 <style>
