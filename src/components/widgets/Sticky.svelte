@@ -5,7 +5,7 @@
     import Text from './stickyTypes/Text.svelte';
     import detectInputType from '../../utils/detectInputType.js';
     export let ref;
-    const {title} = getWidget(ref);
+    const {title, data} = getWidget(ref);
     let type;
     beforeUpdate(() => {
 		  // type = detectInputType($data); // uncomment when dectectInput function is ready
@@ -15,7 +15,7 @@
     {#if type === 'Text'}
         <Text /> <!-- TODO add prop with a bindable dataStore -->
     {:else}
-        <input type="text" /> <!-- TODO bind input to item in dataStore -->
+        <input type="text" value={$data} /> <!-- TODO bind input to item in dataStore -->
     {/if}
 </Widget>
 

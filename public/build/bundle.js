@@ -30,6 +30,21 @@ var app = (function () {
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -342,6 +357,10 @@ var app = (function () {
         else
             dispatch_dev("SvelteDOMSetAttribute", { node, attribute, value });
     }
+    function prop_dev(node, property, value) {
+        node[property] = value;
+        dispatch_dev("SvelteDOMSetProperty", { node, property, value });
+    }
     function set_data_dev(text, data) {
         data = '' + data;
         if (text.data === data)
@@ -364,13 +383,66 @@ var app = (function () {
         }
     }
 
+    const subscriber_queue = [];
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = [];
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (let i = 0; i < subscribers.length; i += 1) {
+                        const s = subscribers[i];
+                        s[1]();
+                        subscriber_queue.push(s, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.push(subscriber);
+            if (subscribers.length === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                const index = subscribers.indexOf(subscriber);
+                if (index !== -1) {
+                    subscribers.splice(index, 1);
+                }
+                if (subscribers.length === 0) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
+
     const dashboards = {
         0: { 
-            title: 'test dash', 
+            title: writable('test dash'), 
             widgets: {
                 0: {
                     type: 'Sticky', 
-                    title: 'Test Sticky'
+                    title: writable('Test Sticky'),
+                    data: writable('Test Input')
                 }
             }
         }
@@ -385,14 +457,15 @@ var app = (function () {
     function create_fragment(ctx) {
     	let nav;
     	let h1;
+    	let t;
 
     	const block = {
     		c: function create() {
     			nav = element("nav");
     			h1 = element("h1");
-    			h1.textContent = "dash title";
-    			add_location(h1, file, 7, 4, 159);
-    			add_location(nav, file, 6, 0, 148);
+    			t = text(/*$title*/ ctx[0]);
+    			add_location(h1, file, 8, 4, 200);
+    			add_location(nav, file, 7, 0, 189);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -400,8 +473,11 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, nav, anchor);
     			append_dev(nav, h1);
+    			append_dev(h1, t);
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*$title*/ 1) set_data_dev(t, /*$title*/ ctx[0]);
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
@@ -420,10 +496,31 @@ var app = (function () {
     	return block;
     }
 
+    function instance($$self, $$props, $$invalidate) {
+    	let $title;
+    	let title = getActiveDash().title;
+    	validate_store(title, "title");
+    	component_subscribe($$self, title, value => $$invalidate(0, $title = value));
+
+    	// TODO bind title from dataStore to an input
+    	console.log(title);
+
+    	$$self.$capture_state = () => {
+    		return {};
+    	};
+
+    	$$self.$inject_state = $$props => {
+    		if ("title" in $$props) $$invalidate(1, title = $$props.title);
+    		if ("$title" in $$props) title.set($title = $$props.$title);
+    	};
+
+    	return [$title, title];
+    }
+
     class DashNav extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, null, create_fragment, safe_not_equal, {});
+    		init(this, options, instance, create_fragment, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -444,18 +541,18 @@ var app = (function () {
     	let t0;
     	let t1;
     	let current;
-    	const default_slot_template = /*$$slots*/ ctx[2].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[1], null);
+    	const default_slot_template = /*$$slots*/ ctx[3].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
     	const block = {
     		c: function create() {
     			div = element("div");
     			h2 = element("h2");
-    			t0 = text(/*title*/ ctx[0]);
+    			t0 = text(/*$title*/ ctx[1]);
     			t1 = space();
     			if (default_slot) default_slot.c();
-    			add_location(h2, file$1, 5, 2, 68);
-    			add_location(div, file$1, 4, 0, 59);
+    			add_location(h2, file$1, 6, 2, 119);
+    			add_location(div, file$1, 5, 0, 110);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -473,10 +570,10 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*title*/ 1) set_data_dev(t0, /*title*/ ctx[0]);
+    			if (!current || dirty & /*$title*/ 2) set_data_dev(t0, /*$title*/ ctx[1]);
 
-    			if (default_slot && default_slot.p && dirty & /*$$scope*/ 2) {
-    				default_slot.p(get_slot_context(default_slot_template, ctx, /*$$scope*/ ctx[1], null), get_slot_changes(default_slot_template, /*$$scope*/ ctx[1], dirty, null));
+    			if (default_slot && default_slot.p && dirty & /*$$scope*/ 4) {
+    				default_slot.p(get_slot_context(default_slot_template, ctx, /*$$scope*/ ctx[2], null), get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null));
     			}
     		},
     		i: function intro(local) {
@@ -505,8 +602,15 @@ var app = (function () {
     	return block;
     }
 
-    function instance($$self, $$props, $$invalidate) {
+    function instance$1($$self, $$props, $$invalidate) {
+    	let $title,
+    		$$unsubscribe_title = noop,
+    		$$subscribe_title = () => ($$unsubscribe_title(), $$unsubscribe_title = subscribe(title, $$value => $$invalidate(1, $title = $$value)), title);
+
+    	$$self.$$.on_destroy.push(() => $$unsubscribe_title());
     	let { title = "Not Set!" } = $$props;
+    	validate_store(title, "title");
+    	$$subscribe_title();
     	const writable_props = ["title"];
 
     	Object.keys($$props).forEach(key => {
@@ -516,25 +620,26 @@ var app = (function () {
     	let { $$slots = {}, $$scope } = $$props;
 
     	$$self.$set = $$props => {
-    		if ("title" in $$props) $$invalidate(0, title = $$props.title);
-    		if ("$$scope" in $$props) $$invalidate(1, $$scope = $$props.$$scope);
+    		if ("title" in $$props) $$subscribe_title($$invalidate(0, title = $$props.title));
+    		if ("$$scope" in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
     	$$self.$capture_state = () => {
-    		return { title };
+    		return { title, $title };
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("title" in $$props) $$invalidate(0, title = $$props.title);
+    		if ("title" in $$props) $$subscribe_title($$invalidate(0, title = $$props.title));
+    		if ("$title" in $$props) title.set($title = $$props.$title);
     	};
 
-    	return [title, $$scope, $$slots];
+    	return [title, $title, $$scope, $$slots];
     }
 
     class Widget extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment$1, safe_not_equal, { title: 0 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { title: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -615,10 +720,16 @@ var app = (function () {
     		c: function create() {
     			input = element("input");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$3, 17, 8, 602);
+    			input.value = /*$data*/ ctx[0];
+    			add_location(input, file$3, 17, 8, 608);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$data*/ 1 && input.value !== /*$data*/ ctx[0]) {
+    				prop_dev(input, "value", /*$data*/ ctx[0]);
+    			}
     		},
     		i: noop,
     		o: noop,
@@ -651,6 +762,7 @@ var app = (function () {
     			mount_component(text_1, target, anchor);
     			current = true;
     		},
+    		p: noop,
     		i: function intro(local) {
     			if (current) return;
     			transition_in(text_1.$$.fragment, local);
@@ -686,7 +798,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*type*/ ctx[1] === "Text") return 0;
+    		if (/*type*/ ctx[3] === "Text") return 0;
     		return 1;
     	}
 
@@ -703,7 +815,9 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			if_block.p(ctx, dirty);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(if_block);
@@ -735,7 +849,7 @@ var app = (function () {
 
     	const widget = new Widget({
     			props: {
-    				title: /*title*/ ctx[0],
+    				title: /*title*/ ctx[1],
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			},
@@ -756,7 +870,7 @@ var app = (function () {
     		p: function update(ctx, [dirty]) {
     			const widget_changes = {};
 
-    			if (dirty & /*$$scope*/ 8) {
+    			if (dirty & /*$$scope, $data*/ 33) {
     				widget_changes.$$scope = { dirty, ctx };
     			}
 
@@ -787,9 +901,12 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$2($$self, $$props, $$invalidate) {
+    	let $data;
     	let { ref } = $$props;
-    	const { title } = getWidget(ref);
+    	const { title, data } = getWidget(ref);
+    	validate_store(data, "data");
+    	component_subscribe($$self, data, value => $$invalidate(0, $data = value));
     	let type;
 
     	beforeUpdate(() => {
@@ -803,25 +920,26 @@ var app = (function () {
     	});
 
     	$$self.$set = $$props => {
-    		if ("ref" in $$props) $$invalidate(2, ref = $$props.ref);
+    		if ("ref" in $$props) $$invalidate(4, ref = $$props.ref);
     	};
 
     	$$self.$capture_state = () => {
-    		return { ref, type };
+    		return { ref, type, $data };
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("ref" in $$props) $$invalidate(2, ref = $$props.ref);
-    		if ("type" in $$props) $$invalidate(1, type = $$props.type);
+    		if ("ref" in $$props) $$invalidate(4, ref = $$props.ref);
+    		if ("type" in $$props) $$invalidate(3, type = $$props.type);
+    		if ("$data" in $$props) data.set($data = $$props.$data);
     	};
 
-    	return [title, type, ref];
+    	return [$data, title, data, type, ref];
     }
 
     class Sticky extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$3, safe_not_equal, { ref: 2 });
+    		init(this, options, instance$2, create_fragment$3, safe_not_equal, { ref: 4 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -833,7 +951,7 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*ref*/ ctx[2] === undefined && !("ref" in props)) {
+    		if (/*ref*/ ctx[4] === undefined && !("ref" in props)) {
     			console.warn("<Sticky> was created without expected prop 'ref'");
     		}
     	}
@@ -1092,7 +1210,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$2($$self) {
+    function instance$3($$self) {
     	let dashData = getActiveDash();
     	let widgets = dashData ? dashData.widgets : [];
 
@@ -1111,7 +1229,7 @@ var app = (function () {
     class Dash extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$4, safe_not_equal, {});
+    		init(this, options, instance$3, create_fragment$4, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,

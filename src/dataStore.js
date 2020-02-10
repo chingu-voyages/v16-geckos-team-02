@@ -1,10 +1,13 @@
+import { writable } from 'svelte/store';
+
 export const dashboards = {
     0: { 
-        title: 'test dash', 
+        title: writable('test dash'), 
         widgets: {
             0: {
                 type: 'Sticky', 
-                title: 'Test Sticky'
+                title: writable('Test Sticky'),
+                data: writable('Test Input')
             }
         }
     }
