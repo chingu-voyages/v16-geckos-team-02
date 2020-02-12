@@ -4,6 +4,7 @@
   import Trash from './buttons/Trash.svelte';
   let menuOpen = false;
   let trashActive = false;
+  
   const closeMenu = () => {
     setTimeout(() => { 
       if (menuOpen) { // timeout and latch so runs after toggle
@@ -17,6 +18,9 @@
     window.addEventListener('click', closeMenu, {capture : true});
   }
   const toggleMenu = () => {menuOpen ? closeMenu() : openMenu()};
+
+  const toggleTrash = () => {trashActive = !trashActive};
+
   const add = type => {
     addWidget(type);
     closeMenu();
@@ -24,9 +28,9 @@
 </script>
   
 <nav>
-  <Trash active={trashActive} />
+  <Trash active={trashActive} on:trash={toggleTrash} on:trash /> <!-- the 2nd on:trash is to pass the event out to App -->
     {#if menuOpen}
-      <img class="cancel" on:escape={() => {menuOpen = false}} src="/images/cancelIcon.svg" alt="x" />
+      <img class="cancel" src="/images/cancelIcon.svg" alt="x" />
       <div>
         <button on:click={() => add('Sticky')}>
           <h3>Sticky</h3> 
