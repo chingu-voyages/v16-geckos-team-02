@@ -1,7 +1,7 @@
 <script>
   import { addWidget } from '../dataStore.js';
-    import Add from './buttons/Add.svelte';
-    import Trash from './buttons/Trash.svelte';
+  import Add from './buttons/Add.svelte';
+  import Trash from './buttons/Trash.svelte';
   let menuOpen = false;
   let trashActive = false;
   const closeMenu = () => {
@@ -21,9 +21,9 @@
     addWidget(type);
     closeMenu();
   }
-  </script>
+</script>
   
-  <nav>
+<nav>
   <Trash active={trashActive} />
     {#if menuOpen}
       <img class="cancel" on:escape={() => {menuOpen = false}} src="/images/cancelIcon.svg" alt="x" />
@@ -34,11 +34,11 @@
         </button>
       </div>
     {/if}
-    <h2>Widgets</h2>
+  <h2>Widgets</h2>
   <Add active={menuOpen} on:add={toggleMenu} />
-  </nav>
+</nav>
   
-  <style>
+<style>
   nav {
     width: 280px;
     position: fixed;
@@ -86,4 +86,4 @@
     font-weight: 300;
     margin: 0;
   }
-  </style>
+</style>
