@@ -58,6 +58,9 @@ var app = (function () {
             ? assign({}, assign(ctx.$$scope.changed || {}, definition[1](fn ? fn(changed) : {})))
             : ctx.$$scope.changed || {};
     }
+    function null_to_empty(value) {
+        return value == null ? '' : value;
+    }
 
     function append(target, node) {
         target.appendChild(node);
@@ -138,6 +141,15 @@ var app = (function () {
                 });
             }
         };
+    }
+    // TODO figure out if we still want to support
+    // shorthand events, or if we want to implement
+    // a real bubbling mechanism
+    function bubble(component, event) {
+        const callbacks = component.$$.callbacks[event.type];
+        if (callbacks) {
+            callbacks.slice().forEach(fn => fn(event));
+        }
     }
 
     const dirty_components = [];
@@ -2513,17 +2525,18 @@ var app = (function () {
     const file$6 = "src\\components\\buttons\\Add.svelte";
 
     function create_fragment$6(ctx) {
-    	var button;
+    	var button, img, button_class_value, dispose;
 
     	return {
     		c: function create() {
     			button = element("button");
     			img = element("img");
-    			if (img.src !== (img_src_value = "/images/addIcon.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "+");
-    			add_location(img, file$5, 9, 4, 251);
-    			attr_dev(button, "class", button_class_value = "" + (null_to_empty(/*active*/ ctx[0] ? "active" : "") + " svelte-9b9csn"));
-    			add_location(button, file$5, 8, 0, 189);
+    			attr(img, "src", "/images/addIcon.svg");
+    			attr(img, "alt", "+");
+    			add_location(img, file$6, 9, 4, 251);
+    			attr(button, "class", button_class_value = "" + null_to_empty((ctx.active ? 'active' : '')) + " svelte-9b9csn");
+    			add_location(button, file$6, 8, 0, 189);
+    			dispose = listen(button, "click", ctx.add);
     		},
 
     		l: function claim(nodes) {
@@ -2531,66 +2544,54 @@ var app = (function () {
     		},
 
     		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, img);
-    			dispose = listen_dev(button, "click", /*add*/ ctx[1], false, false, false);
+    			insert(target, button, anchor);
+    			append(button, img);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*active*/ 1 && button_class_value !== (button_class_value = "" + (null_to_empty(/*active*/ ctx[0] ? "active" : "") + " svelte-9b9csn"))) {
-    				attr_dev(button, "class", button_class_value);
+
+    		p: function update(changed, ctx) {
+    			if ((changed.active) && button_class_value !== (button_class_value = "" + null_to_empty((ctx.active ? 'active' : '')) + " svelte-9b9csn")) {
+    				attr(button, "class", button_class_value);
     			}
     		},
+
     		i: noop,
     		o: noop,
 
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
+    			if (detaching) {
+    				detach(button);
+    			}
+
     			dispose();
     		}
     	};
     }
 
-    function instance$5($$self, $$props, $$invalidate) {
+    function instance$6($$self, $$props, $$invalidate) {
     	let { active } = $$props;
-    	const dispatch = createEventDispatcher();
-    	const add = () => dispatch("add");
-    	const writable_props = ["active"];
+        const dispatch = createEventDispatcher();
+        const add = () => dispatch('add');
 
+    	const writable_props = ['active'];
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Add> was created with unknown prop '${key}'`);
+    		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Add> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$set = $$props => {
-    		if ("active" in $$props) $$invalidate(0, active = $$props.active);
+    		if ('active' in $$props) $$invalidate('active', active = $$props.active);
     	};
 
-    	$$self.$capture_state = () => {
-    		return { active };
-    	};
-
-    	$$self.$inject_state = $$props => {
-    		if ("active" in $$props) $$invalidate(0, active = $$props.active);
-    	};
-
-    	return [active, add];
+    	return { active, add };
     }
 
     class Add extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { active: 0 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Add",
-    			options,
-    			id: create_fragment$5.name
-    		});
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, ["active"]);
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
-
-    		if (/*active*/ ctx[0] === undefined && !("active" in props)) {
+    		if (ctx.active === undefined && !('active' in props)) {
     			console.warn("<Add> was created without expected prop 'active'");
     		}
     	}
@@ -2604,25 +2605,55 @@ var app = (function () {
     	}
     }
 
-    /* src\components\buttons\Trash.svelte generated by Svelte v3.18.1 */
-    const file$6 = "src\\components\\buttons\\Trash.svelte";
+    /* src\components\buttons\Trash.svelte generated by Svelte v3.7.1 */
 
-    function create_fragment$6(ctx) {
-    	let button;
-    	let img;
-    	let img_src_value;
-    	let button_class_value;
-    	let dispose;
+    const file$7 = "src\\components\\buttons\\Trash.svelte";
+
+    // (13:0) {#if active}
+    function create_if_block$3(ctx) {
+    	var img, dispose;
 
     	return {
     		c: function create() {
+    			img = element("img");
+    			attr(img, "class", "cancel");
+    			attr(img, "src", "/images/cancelIcon.svg");
+    			attr(img, "alt", "x");
+    			add_location(img, file$7, 13, 0, 283);
+    			dispose = listen(img, "click", ctx.trash);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, img, anchor);
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(img);
+    			}
+
+    			dispose();
+    		}
+    	};
+    }
+
+    function create_fragment$7(ctx) {
+    	var t, button, img, button_class_value, dispose;
+
+    	var if_block = (ctx.active) && create_if_block$3(ctx);
+
+    	return {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			t = space();
     			button = element("button");
     			img = element("img");
-    			if (img.src !== (img_src_value = "/images/TrashIcon.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "-");
-    			add_location(img, file$6, 8, 58, 251);
-    			attr_dev(button, "class", button_class_value = "" + (null_to_empty(/*active*/ ctx[0] ? "active" : "") + " svelte-qftq3z"));
-    			add_location(button, file$6, 8, 0, 193);
+    			attr(img, "src", "/images/TrashIcon.svg");
+    			attr(img, "alt", "-");
+    			add_location(img, file$7, 15, 58, 426);
+    			attr(button, "class", button_class_value = "" + null_to_empty((ctx.active ? 'active' : '')) + " svelte-qftq3z");
+    			add_location(button, file$7, 15, 0, 368);
+    			dispose = listen(button, "click", ctx.trash);
     		},
 
     		l: function claim(nodes) {
@@ -2630,66 +2661,74 @@ var app = (function () {
     		},
 
     		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			append_dev(button, img);
-    			dispose = listen_dev(button, "click", /*trash*/ ctx[1], false, false, false);
+    			if (if_block) if_block.m(target, anchor);
+    			insert(target, t, anchor);
+    			insert(target, button, anchor);
+    			append(button, img);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*active*/ 1 && button_class_value !== (button_class_value = "" + (null_to_empty(/*active*/ ctx[0] ? "active" : "") + " svelte-qftq3z"))) {
-    				attr_dev(button, "class", button_class_value);
+
+    		p: function update(changed, ctx) {
+    			if (ctx.active) {
+    				if (!if_block) {
+    					if_block = create_if_block$3(ctx);
+    					if_block.c();
+    					if_block.m(t.parentNode, t);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+
+    			if ((changed.active) && button_class_value !== (button_class_value = "" + null_to_empty((ctx.active ? 'active' : '')) + " svelte-qftq3z")) {
+    				attr(button, "class", button_class_value);
     			}
     		},
+
     		i: noop,
     		o: noop,
 
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
+    			if (if_block) if_block.d(detaching);
+
+    			if (detaching) {
+    				detach(t);
+    				detach(button);
+    			}
+
     			dispose();
     		}
     	};
     }
 
-    function instance$6($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let { active } = $$props;
-    	const dispatch = createEventDispatcher();
-    	const trash = () => dispatch("trash");
-    	const writable_props = ["active"];
+        const dispatch = createEventDispatcher();
+        const trash = () => {
+            dispatch('trash', {
+    			active: !active // not sure why this inverts
+    		});
+        };
 
+    	const writable_props = ['active'];
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Trash> was created with unknown prop '${key}'`);
+    		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Trash> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$set = $$props => {
-    		if ("active" in $$props) $$invalidate(0, active = $$props.active);
+    		if ('active' in $$props) $$invalidate('active', active = $$props.active);
     	};
 
-    	$$self.$capture_state = () => {
-    		return { active };
-    	};
-
-    	$$self.$inject_state = $$props => {
-    		if ("active" in $$props) $$invalidate(0, active = $$props.active);
-    	};
-
-    	return [active, trash];
+    	return { active, trash };
     }
 
     class Trash extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { active: 0 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Trash",
-    			options,
-    			id: create_fragment$6.name
-    		});
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, ["active"]);
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
-
-    		if (/*active*/ ctx[0] === undefined && !("active" in props)) {
+    		if (ctx.active === undefined && !('active' in props)) {
     			console.warn("<Trash> was created without expected prop 'active'");
     		}
     	}
@@ -2705,20 +2744,13 @@ var app = (function () {
 
     /* src\components\WidgetMenu.svelte generated by Svelte v3.7.1 */
 
-    // (28:4) {#if menuOpen}
-    function create_if_block$2(ctx) {
-    	let img0;
-    	let img0_src_value;
-    	let t0;
-    	let div;
-    	let button;
-    	let h3;
-    	let t2;
-    	let img1;
-    	let img1_src_value;
-    	let dispose;
+    const file$8 = "src\\components\\WidgetMenu.svelte";
 
-    	const block = {
+    // (32:4) {#if menuOpen}
+    function create_if_block$4(ctx) {
+    	var img0, t0, div, button, h3, t2, img1, dispose;
+
+    	return {
     		c: function create() {
     			img0 = element("img");
     			t0 = space();
@@ -2728,91 +2760,77 @@ var app = (function () {
     			h3.textContent = "Sticky";
     			t2 = space();
     			img1 = element("img");
-    			attr_dev(img0, "class", "cancel svelte-19k8yvu");
-    			if (img0.src !== (img0_src_value = "/images/cancelIcon.svg")) attr_dev(img0, "src", img0_src_value);
-    			attr_dev(img0, "alt", "x");
-    			add_location(img0, file$7, 28, 6, 786);
-    			attr_dev(h3, "class", "svelte-19k8yvu");
-    			add_location(h3, file$7, 31, 10, 956);
-    			if (img1.src !== (img1_src_value = "/images/addIcon.svg")) attr_dev(img1, "src", img1_src_value);
-    			attr_dev(img1, "alt", "+");
-    			add_location(img1, file$7, 32, 10, 984);
-    			attr_dev(button, "class", "svelte-19k8yvu");
-    			add_location(button, file$7, 30, 8, 905);
-    			attr_dev(div, "class", "svelte-19k8yvu");
-    			add_location(div, file$7, 29, 6, 890);
+    			attr(img0, "class", "cancel svelte-19k8yvu");
+    			attr(img0, "src", "/images/cancelIcon.svg");
+    			attr(img0, "alt", "x");
+    			add_location(img0, file$8, 32, 6, 943);
+    			attr(h3, "class", "svelte-19k8yvu");
+    			add_location(h3, file$8, 35, 10, 1076);
+    			attr(img1, "src", "/images/addIcon.svg");
+    			attr(img1, "alt", "+");
+    			add_location(img1, file$8, 36, 10, 1104);
+    			attr(button, "class", "svelte-19k8yvu");
+    			add_location(button, file$8, 34, 8, 1025);
+    			attr(div, "class", "svelte-19k8yvu");
+    			add_location(div, file$8, 33, 6, 1010);
+    			dispose = listen(button, "click", ctx.click_handler);
     		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, img0, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, div, anchor);
-    			append_dev(div, button);
-    			append_dev(button, h3);
-    			append_dev(button, t2);
-    			append_dev(button, img1);
 
-    			dispose = [
-    				listen_dev(img0, "escape", /*escape_handler*/ ctx[6], false, false, false),
-    				listen_dev(button, "click", /*click_handler*/ ctx[7], false, false, false)
-    			];
+    		m: function mount(target, anchor) {
+    			insert(target, img0, anchor);
+    			insert(target, t0, anchor);
+    			insert(target, div, anchor);
+    			append(div, button);
+    			append(button, h3);
+    			append(button, t2);
+    			append(button, img1);
     		},
-    		p: noop,
+
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(img0);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(div);
-    			run_all(dispose);
+    			if (detaching) {
+    				detach(img0);
+    				detach(t0);
+    				detach(div);
+    			}
+
+    			dispose();
     		}
     	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$2.name,
-    		type: "if",
-    		source: "(28:4) {#if menuOpen}",
-    		ctx
-    	});
-
-    	return block;
     }
 
-    function create_fragment$7(ctx) {
-    	let nav;
-    	let t0;
-    	let t1;
-    	let h2;
-    	let t3;
-    	let current;
+    function create_fragment$8(ctx) {
+    	var nav, t0, t1, h2, t3, current;
 
-    	const trash = new Trash({
-    			props: { active: /*trashActive*/ ctx[1] },
-    			$$inline: true
-    		});
+    	var trash = new Trash({
+    		props: { active: ctx.trashActive },
+    		$$inline: true
+    	});
+    	trash.$on("trash", ctx.toggleTrash);
+    	trash.$on("trash", ctx.trash_handler);
 
-    	let if_block = /*menuOpen*/ ctx[0] && create_if_block$2(ctx);
+    	var if_block = (ctx.menuOpen) && create_if_block$4(ctx);
 
-    	const add_1 = new Add({
-    			props: { active: /*menuOpen*/ ctx[0] },
-    			$$inline: true
-    		});
+    	var add_1 = new Add({
+    		props: { active: ctx.menuOpen },
+    		$$inline: true
+    	});
+    	add_1.$on("add", ctx.toggleMenu);
 
-    	add_1.$on("add", /*toggleMenu*/ ctx[2]);
-
-    	const block = {
+    	return {
     		c: function create() {
     			nav = element("nav");
-    			create_component(trash.$$.fragment);
+    			trash.$$.fragment.c();
     			t0 = space();
     			if (if_block) if_block.c();
     			t1 = space();
     			h2 = element("h2");
     			h2.textContent = "Widgets";
     			t3 = space();
-    			create_component(add_1.$$.fragment);
-    			attr_dev(h2, "class", "svelte-19k8yvu");
-    			add_location(h2, file$7, 36, 2, 1073);
-    			attr_dev(nav, "class", "svelte-19k8yvu");
-    			add_location(nav, file$7, 25, 0, 719);
+    			add_1.$$.fragment.c();
+    			attr(h2, "class", "svelte-19k8yvu");
+    			add_location(h2, file$8, 40, 2, 1193);
+    			attr(nav, "class", "svelte-19k8yvu");
+    			add_location(nav, file$8, 29, 0, 786);
     		},
 
     		l: function claim(nodes) {
@@ -2820,22 +2838,25 @@ var app = (function () {
     		},
 
     		m: function mount(target, anchor) {
-    			insert_dev(target, nav, anchor);
+    			insert(target, nav, anchor);
     			mount_component(trash, nav, null);
-    			append_dev(nav, t0);
+    			append(nav, t0);
     			if (if_block) if_block.m(nav, null);
-    			append_dev(nav, t1);
-    			append_dev(nav, h2);
-    			append_dev(nav, t3);
+    			append(nav, t1);
+    			append(nav, h2);
+    			append(nav, t3);
     			mount_component(add_1, nav, null);
     			current = true;
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (/*menuOpen*/ ctx[0]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block$2(ctx);
+
+    		p: function update(changed, ctx) {
+    			var trash_changes = {};
+    			if (changed.trashActive) trash_changes.active = ctx.trashActive;
+    			trash.$set(trash_changes);
+
+    			if (ctx.menuOpen) {
+    				if (!if_block) {
+    					if_block = create_if_block$4(ctx);
     					if_block.c();
     					if_block.m(nav, t1);
     				}
@@ -2844,14 +2865,17 @@ var app = (function () {
     				if_block = null;
     			}
 
-    			const add_1_changes = {};
-    			if (dirty & /*menuOpen*/ 1) add_1_changes.active = /*menuOpen*/ ctx[0];
+    			var add_1_changes = {};
+    			if (changed.menuOpen) add_1_changes.active = ctx.menuOpen;
     			add_1.$set(add_1_changes);
     		},
+
     		i: function intro(local) {
     			if (current) return;
     			transition_in(trash.$$.fragment, local);
+
     			transition_in(add_1.$$.fragment, local);
+
     			current = true;
     		},
 
@@ -2862,84 +2886,68 @@ var app = (function () {
     		},
 
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(nav);
+    			if (detaching) {
+    				detach(nav);
+    			}
+
     			destroy_component(trash);
+
     			if (if_block) if_block.d();
+
     			destroy_component(add_1);
     		}
     	};
     }
 
-    function instance$7($$self, $$props, $$invalidate) {
-    	let menuOpen = false;
-    	let trashActive = false;
+    function instance$8($$self, $$props, $$invalidate) {
+    	
+      let menuOpen = false;
+      let trashActive = false;
+      
+      const closeMenu = () => {
+        setTimeout(() => { 
+          if (menuOpen) { // timeout and latch so runs after toggle
+            $$invalidate('menuOpen', menuOpen = false);
+          }
+        }, 0);
+        window.removeEventListener('click', closeMenu, {capture : true});
+      };
+      const openMenu = () => {
+        $$invalidate('menuOpen', menuOpen = true);
+        window.addEventListener('click', closeMenu, {capture : true});
+      };
+      const toggleMenu = () => {menuOpen ? closeMenu() : openMenu();};
 
-    	const closeMenu = () => {
-    		setTimeout(
-    			() => {
-    				if (menuOpen) {
-    					// timeout and latch so runs after toggle
-    					$$invalidate(0, menuOpen = false);
-    				}
-    			},
-    			0
-    		);
+      const toggleTrash = () => {$$invalidate('trashActive', trashActive = !trashActive);};
 
-    		window.removeEventListener("click", closeMenu, { capture: true });
-    	};
+      const add = type => {
+        addWidget(type);
+        closeMenu();
+      };
 
-    	const openMenu = () => {
-    		$$invalidate(0, menuOpen = true);
-    		window.addEventListener("click", closeMenu, { capture: true });
-    	};
+    	function trash_handler(event) {
+    		bubble($$self, event);
+    	}
 
-    	const toggleMenu = () => {
-    		menuOpen ? closeMenu() : openMenu();
-    	};
+    	function click_handler() {
+    		return add('Sticky');
+    	}
 
-    	const add = type => {
-    		addWidget(type);
-    		closeMenu();
-    	};
-
-    	const escape_handler = () => {
-    		$$invalidate(0, menuOpen = false);
-    	};
-
-    	const click_handler = () => add("Sticky");
-
-    	$$self.$capture_state = () => {
-    		return {};
-    	};
-
-    	$$self.$inject_state = $$props => {
-    		if ("menuOpen" in $$props) $$invalidate(0, menuOpen = $$props.menuOpen);
-    		if ("trashActive" in $$props) $$invalidate(1, trashActive = $$props.trashActive);
-    	};
-
-    	return [
+    	return {
     		menuOpen,
     		trashActive,
     		toggleMenu,
+    		toggleTrash,
     		add,
-    		closeMenu,
-    		openMenu,
-    		escape_handler,
+    		trash_handler,
     		click_handler
-    	];
+    	};
     }
 
     class WidgetMenu extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "WidgetMenu",
-    			options,
-    			id: create_fragment$7.name
-    		});
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, []);
     	}
     }
 
@@ -2948,13 +2956,14 @@ var app = (function () {
     const file$9 = "src\\App.svelte";
 
     function create_fragment$9(ctx) {
-    	var main, t0, t1, current;
+    	var main, t0, t1, main_class_value, current;
 
     	var dashnav = new DashNav({ $$inline: true });
 
     	var dash = new Dash({ $$inline: true });
 
     	var widgetmenu = new WidgetMenu({ $$inline: true });
+    	widgetmenu.$on("trash", ctx.activateTrash);
 
     	return {
     		c: function create() {
@@ -2964,7 +2973,8 @@ var app = (function () {
     			dash.$$.fragment.c();
     			t1 = space();
     			widgetmenu.$$.fragment.c();
-    			add_location(main, file$9, 21, 0, 521);
+    			attr(main, "class", main_class_value = ctx.trashActive ? 'trash' : '');
+    			add_location(main, file$9, 11, 0, 315);
     		},
 
     		l: function claim(nodes) {
@@ -2981,7 +2991,11 @@ var app = (function () {
     			current = true;
     		},
 
-    		p: noop,
+    		p: function update(changed, ctx) {
+    			if ((!current || changed.trashActive) && main_class_value !== (main_class_value = ctx.trashActive ? 'trash' : '')) {
+    				attr(main, "class", main_class_value);
+    			}
+    		},
 
     		i: function intro(local) {
     			if (current) return;
@@ -3015,27 +3029,21 @@ var app = (function () {
     	};
     }
 
-    function instance$6($$self) {
+    function instance$9($$self, $$props, $$invalidate) {
     	
+    	let trashActive = false;
+    	const activateTrash = event => {
+    		console.log(event.detail);
+    		$$invalidate('trashActive', trashActive = event.detail.active);
+    	};
 
-      const id = () =>
-        "_" +
-        Math.random()
-          .toString(36)
-          .substr(2, 9);
-
-      let items = [
-        gridHelp.item({ x: 0, y: 0, w: 2, h: 2, id: id() }),
-        gridHelp.item({ x: 2, y: 0, w: 2, h: 2, id: id() })
-      ];
-
-    	return {};
+    	return { trashActive, activateTrash };
     }
 
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$9, safe_not_equal, []);
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, []);
     	}
     }
 

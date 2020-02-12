@@ -14,5 +14,3 @@
 	<Dash />
     <WidgetMenu on:trash={activateTrash} />
 </main>
-
-</main>
