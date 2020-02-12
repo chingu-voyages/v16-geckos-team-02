@@ -24,9 +24,18 @@
   </script>
   
   <nav>
-    <Add />
+  <Trash active={trashActive} />
+    {#if menuOpen}
+      <img class="cancel" on:escape={() => {menuOpen = false}} src="/images/cancelIcon.svg" alt="x" />
+      <div>
+        <button on:click={() => add('Sticky')}>
+          <h3>Sticky</h3> 
+          <img src="/images/addIcon.svg" alt="+" />
+        </button>
+      </div>
+    {/if}
     <h2>Widgets</h2>
-    <Trash />
+  <Add active={menuOpen} on:add={toggleMenu} />
   </nav>
   
   <style>
