@@ -24,7 +24,7 @@
         height: 68px;
         border: solid 1px #707070;
         margin: 0;
-        background: none;
+        background: #ffffff;
     }
     .active {
         background: #707070;
