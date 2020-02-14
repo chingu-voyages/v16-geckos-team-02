@@ -4,7 +4,6 @@
 	import WidgetMenu from './components/WidgetMenu.svelte';
 	let trashActive = false;
 	const activateTrash = event => {
-		console.log(event.detail)
 		trashActive = event.detail.active;
 	}
 </script>
