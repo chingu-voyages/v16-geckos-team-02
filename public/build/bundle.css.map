@@ -2,6 +2,7 @@
   "version": 3,
   "file": "bundle.css",
   "sources": [
+    "..\\..\\src\\components\\DashNav.svelte",
     "..\\..\\src\\components\\Dash.svelte",
     "..\\..\\src\\components\\WidgetMenu.svelte",
     "..\\..\\node_modules\\svelte-grid\\src\\index.svelte",
