@@ -7,5 +7,6 @@ div.svelte-ikmpkg{display:grid;place-items:start center;width:100%;height:100%;o
 button.svelte-9b9csn{grid-area:add;min-width:100%;min-height:100%;width:68px;height:68px;border:solid 1px #707070;margin:0;background:none}.active.svelte-9b9csn{background:#707070}
 button.svelte-9jl02c{grid-area:trash;min-width:100%;min-height:100%;width:68px;height:68px;border:solid 1px #707070;margin:0;background:#ffffff}.active.svelte-9jl02c{background:#707070}
 textarea.svelte-19wb5tu{width:90%}
+textarea.svelte-1mzxpf3,article.svelte-1mzxpf3{width:90%;background:none;padding:0;margin:0}
 
 /*# sourceMappingURL=bundle.css.map */
