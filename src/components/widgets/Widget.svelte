@@ -1,11 +1,13 @@
 <script>
-    import { getWidget } from '../../dataStore';
+    import { getWidget, activeDashId ,removeWidget} from '../../dataStore';
     import Sticky from './Sticky.svelte';
     import Trash from '../buttons/Trash.svelte';
     export let ref;
     let {_title, _data, type} = getWidget(ref);
     let editingTitle = false;
-    const removeSelf = () => console.log('deleting self'); // todo link to a delete widget function from dataStore
+    const removeSelf = () => {
+      removeWidget(activeDashId, ref);
+    }
 </script>
 
 <div>
