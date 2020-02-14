@@ -13,9 +13,11 @@
 {#if type === 'Text'}
     <Text {_data} />
 {:else}
-    <input type="text" bind:value={$_data} />
+    <textarea bind:value={$_data} />
 {/if}
 
 <style>
-
+    textarea {
+      width: 90%;
+    }
 </style>
