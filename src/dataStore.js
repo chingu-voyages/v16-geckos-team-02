@@ -11,7 +11,8 @@ export const addDash = (title, ref = Symbol()) => {
     try {
         const dashData = {
             _title: writable(title),
-            widgets: new Map()
+            widgets: new Map(),
+            _widgetsCount: writable(0)
         };
         dashboards.set(ref, dashData);
     } catch (e) {
@@ -26,6 +27,8 @@ export const addWidget = type => {
             _data: writable('')
         }
         getActiveDash().widgets.set(Symbol(), widgetData);
+        getActiveDash()._widgetsCount.update(n => n + 1);
+
     } catch (e) {
         // TODO decide how to handle the exception
     }
@@ -41,7 +44,10 @@ export const removeDash = ref => {
 
 export const removeWidget = (dashRef, widgetRef) => {
     try {
-        dashboards.get(dashRef).widgets.delete(widgetRef);
+        if(dashboards.get(dashRef).widgets.delete(widgetRef))
+        {
+            dashboards.get(dashRef)._widgetsCount.update(n => n - 1);
+        }
     } catch (e) {
         // TODO decide how to handle the exception
     }
