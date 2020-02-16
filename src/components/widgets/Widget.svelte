@@ -6,7 +6,7 @@
     let {_title, _data, type} = getWidget(ref);
     let editingTitle = false;
     const removeSelf = () => {
-      removeWidget(activeDashId, ref);
+      removeWidget(ref);
     }
 </script>
 

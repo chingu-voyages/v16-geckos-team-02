@@ -1,35 +1,43 @@
 <script>
-  import { getActiveDash } from "../dataStore";
+  import { getActiveDash, getWidget, setWidgetSizeAndPos } from "../dataStore";
+  import { beforeUpdate } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
-  let dashData = getActiveDash();
-  let widgets = dashData ? Array.from(dashData.widgets.keys()) : [];
-
-   //Grid Layout 
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
 
     //The array of grid elements
- let items_arr = [];
- let cols = 10;
-
-    //Add so many items to grid as we have in 'widgets'
-    //how can we get positions and sizes of each Widget? 
-    //It will be stored in dataStorage by default(as MVP)?
-
-  widgets.forEach((ref) => {
-    let newItem = gridHelp.item({
-    w: 2,
-    h: 2,
-    x: 3,
-    y: 0,
-    id: ref
+  let items_arr = [];
+  let cols = 10;
+  let _widgetsCount = getActiveDash()._widgetsCount;
+  const updateWidgetSizeAndPos = item => {
+    const {w, h, x, y} = item;
+    setWidgetSizeAndPos(item.id, {w, h, x, y});
+  }
+   //Grid Layout
+  let widgets = [];
+    beforeUpdate(() => {
+      if ($_widgetsCount !== widgets.length) {
+        items_arr = [];
+        widgets = Array.from(getActiveDash().widgets.keys());
+        widgets.forEach((ref) => {
+          let {w, h, x, y} = getWidget(ref).sizeAndPos;
+          let newItem = gridHelp.item({
+            w,
+            h,
+            x,
+            y,
+            id: ref
+          });
+          items_arr = gridHelp.appendItem(newItem, items_arr, cols);
+        });
+        items_arr.forEach(item => {
+          updateWidgetSizeAndPos(item);
+        })
+      }
   });
-  items_arr = gridHelp.appendItem(newItem, items_arr, cols);
-  })
- 
 </script>
 
-<Grid items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100}>
+<Grid on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100}>
   <div class="content" style="background: #ccc; border: 1px solid black;">
     <Widget ref={item.id} />
   </div>
