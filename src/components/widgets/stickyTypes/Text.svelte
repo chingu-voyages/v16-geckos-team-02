@@ -13,10 +13,8 @@
 <style>
 	textarea, article {
 		width: 90%;
-		height: 100%;
 		background: none;
 		padding: 0;
 		margin: 0;
-		white-space: pre-wrap;
 	}
 </style>

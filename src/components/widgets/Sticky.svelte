@@ -19,6 +19,5 @@
 <style>
     textarea {
       width: 90%;
-      height: 100%;
     }
 </style>

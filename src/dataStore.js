@@ -72,5 +72,3 @@ export const setWidgetSizeAndPos = (ref, data) => {
 
 addDash('default dash', activeDashId);
 addWidget('Sticky');
-addWidget('Sticky');
-addWidget('Sticky');
