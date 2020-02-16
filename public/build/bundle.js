@@ -3118,7 +3118,7 @@ var app = (function () {
 
     const file$9 = "src\\components\\Dash.svelte";
 
-    // (40:0) <Grid on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100}>
+    // (40:0) <Grid fillEmpty={false} on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100}>
     function create_default_slot(ctx) {
     	var div, current;
 
@@ -3134,7 +3134,7 @@ var app = (function () {
     			attr(div, "class", "content svelte-1rzrf7c");
     			set_style(div, "background", "#ccc");
     			set_style(div, "border", "1px solid black");
-    			add_location(div, file$9, 40, 2, 1335);
+    			add_location(div, file$9, 40, 2, 1353);
     		},
 
     		m: function mount(target, anchor) {
@@ -3181,6 +3181,7 @@ var app = (function () {
     	}
 
     	let grid_props = {
+    		fillEmpty: false,
     		items: ctx.items_arr,
     		cols: cols,
     		rowHeight: 100,
