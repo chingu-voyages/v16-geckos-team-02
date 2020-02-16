@@ -547,10 +547,6 @@ var app = (function () {
             if(dashboards.get(dashRef).widgets.delete(widgetRef))
             {
                 dashboards.get(dashRef)._widgetsCount.update(n => n - 1);
-                console.log('deleted');
-            }
-            else {
-                console.log(dashboards.get(dashRef));
             }
         } catch (e) {
             // TODO decide how to handle the exception
