@@ -19,13 +19,13 @@ export const addDash = (title, ref = Symbol()) => {
         // TODO decide how to handle the exception
     }
 }
-export const addWidget = type => {
+export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 2, h: 2, x: 0, y: 0}) => {
     try {
         const widgetData = {
             type,
-            sizeAndPos: {w: 2, h: 2, x: 0, y: 0},
-            _title: writable(''),
-            _data: writable('')
+            sizeAndPos,
+            _title: writable(title),
+            _data: writable(data)
         }
         getActiveDash().widgets.set(Symbol(), widgetData);
         getActiveDash()._widgetsCount.update(n => n + 1);
@@ -70,5 +70,34 @@ export const setWidgetSizeAndPos = (ref, data) => {
     }
 }
 
-addDash('default dash', activeDashId);
-addWidget('Sticky');
+addDash('Prototype', activeDashId);
+addWidget(
+    'Sticky', 
+    'Welcome', 
+    'This is currently only a prototype. The concept is a personal dash space for organising activities. At the moment functionality is limited.',
+    {w: 2, h: 3, x: 0, y: 0 }
+);
+addWidget(
+    'Sticky', 
+    'Widgets', 
+    'These are the building block. Each has an editiable title. You can resize and drag and drop them.',
+    {w: 2, h: 3, x: 2, y: 1 }
+);
+addWidget(
+    'Sticky', 
+    'Sticky', 
+    'A type of Widget. Currently the only type available for the prototype. It accepts a text input. Future versions will accept and automatically convert image urls, dates, links, and todo lists.',
+    {w: 3, h: 4, x: 2, y: 2 }
+);
+addWidget(
+    'Sticky', 
+    'Add Widget', 
+    'You may add more widgets using the widgets menu in the bottom right corner.',
+    {w: 2, h: 3, x: 2, y: 3 }
+);
+addWidget(
+    'Sticky', 
+    'Delete Widgets', 
+    'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
+    {w: 2, h: 3, x: 4, y: 4 }
+);
