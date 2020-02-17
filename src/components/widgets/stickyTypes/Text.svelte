@@ -2,10 +2,11 @@
 <script>
 	export let _data;
 	let editing = true;
+	const disableEditIfNoFocus = () => { if (this !== document.activeElement) editing = false };
 </script>
 
 {#if editing}
-	<textarea bind:value={$_data} on:blur={() => editing = false} autofocus />
+	<textarea on:change={disableEditIfNoFocus} bind:value={$_data} on:blur={() => editing = false} autofocus />
 {:else}
 	<article on:click={() => editing = true}>{$_data}</article>
 {/if}
