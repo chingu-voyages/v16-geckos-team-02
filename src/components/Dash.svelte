@@ -37,16 +37,20 @@
   });
 </script>
 
-<Grid fillEmpty={false} on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100}>
-  <div class="content" style="background: #ccc; border: 1px solid black;">
-    <Widget ref={item.id} />
-  </div>
-</Grid>
+<div class="grid-container">
+  <Grid fillEmpty={false} on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100} gap={20}>
+    <div class="content">
+      <Widget ref={item.id} />
+    </div>
+  </Grid>
+</div>
 
 <style>
-  div {
+  .grid-container {
     width: 100%;
     height: 100%;
+    padding: 20px;
+    padding-bottom: 15vh;
   }
   .content {
     width: 100%;
@@ -55,12 +59,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: large;
-  }
-  :global(.svlt-grid-shadow) {
-    background: pink;
-  }
-  :global(.svlt-grid-container) {
-    background: #eee;
+    border: 1px solid #707070;
   }
 </style>
