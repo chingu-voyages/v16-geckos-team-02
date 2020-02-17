@@ -35,10 +35,18 @@
         })
       }
   });
+
+  let breakpoints = [
+    [1500, 10],
+    [1200, 8],
+    [900, 6],
+    [600, 4],
+    [450, 2],
+  ];
 </script>
 
 <div class="grid-container">
-  <Grid fillEmpty={false} on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100} gap={20}>
+  <Grid {breakpoints} fillEmpty={false} on:adjust={event => updateWidgetSizeAndPos(event.detail.focuesdItem)} items={items_arr} bind:items={items_arr} cols={cols} let:item rowHeight={100} gap={20}>
     <div class="content">
       <Widget ref={item.id} />
     </div>
