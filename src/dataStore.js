@@ -3,8 +3,10 @@ import {
 } from 'svelte/store';
 
 const dashboards = new Map();
-export const activeDashId = Symbol(); // the first dashboard key
-export const getActiveDash = () => dashboards.get(activeDashId);
+const counter = 0;
+export const activeDashId = writable(Symbol()); // the first dashboard key
+export const getActiveDash = () => {return dashboards.get(activeDashId)};
+
 export const getWidget = ref => getActiveDash().widgets.get(ref);
 
 export const addDash = (title, ref = Symbol()) => {

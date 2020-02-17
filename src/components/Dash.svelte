@@ -1,5 +1,5 @@
 <script>
-  import { getActiveDash, getWidget, setWidgetSizeAndPos } from "../dataStore";
+  import { getActiveDash, getWidget, setWidgetSizeAndPos, activeDashId } from "../dataStore";
   import { beforeUpdate } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
@@ -16,6 +16,10 @@
    //Grid Layout
   let widgets = [];
     beforeUpdate(() => {
+      if($activeDashId)
+       {
+         _widgetsCount = getActiveDash()._widgetsCount;
+       }
       if ($_widgetsCount !== widgets.length) {
         items_arr = [];
         widgets = Array.from(getActiveDash().widgets.keys());

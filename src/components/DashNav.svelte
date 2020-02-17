@@ -1,11 +1,25 @@
 <script>
-    import { getActiveDash } from '../dataStore';
+    import { beforeUpdate } from 'svelte';
+    import { getActiveDash, activeDashId, addDash } from '../dataStore';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
     import Trash from './buttons/Trash.svelte';
     import Add from './buttons/Add.svelte';
     let _title = getActiveDash()._title;
+    beforeUpdate(()=>{
+         if($activeDashId)
+         _title = getActiveDash()._title;
+    });
     let editingTitle = false;
+
+      const changeActiveId = () => {
+          activeDashId.update(()=>Symbol());
+          addDash('new dash', activeDashId);
+      };
+
+    
+
+
 </script>
 
 <nav>
@@ -18,7 +32,7 @@
             <a class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</a>
         {/if}
     </div>
-    <Add />
+    <Add on:add={changeActiveId}/>
     <Right />
 </nav>
 
