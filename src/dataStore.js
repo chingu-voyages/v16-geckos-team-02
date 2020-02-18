@@ -1,11 +1,11 @@
-import {
-    writable
-} from 'svelte/store';
+import { writable } from 'svelte/store';
 
 const dashboards = new Map();
 export const activeDashId = Symbol(); // the first dashboard key
 export const getActiveDash = () => dashboards.get(activeDashId);
 export const getWidget = ref => getActiveDash().widgets.get(ref);
+const getWidgetsArray = () => Array.from(getActiveDash().widgets.values());
+const lastUsedRow = () => Math.max(...getWidgetsArray().map(widget => widget.sizeAndPos.y + widget.sizeAndPos.h))-1;
 
 export const addDash = (title, ref = Symbol()) => {
     try {
@@ -19,7 +19,19 @@ export const addDash = (title, ref = Symbol()) => {
         // TODO decide how to handle the exception
     }
 }
-export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 2, h: 2, x: 0, y: 0}) => {
+export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 4, h: 5}) => {
+    const lastRowUsed = lastUsedRow();
+    if (sizeAndPos.x === undefined) {
+        const widgets = getWidgetsArray();
+        // find largest x position used, largestX
+        const largestX = Math.max(...widgets.map(widget => widget.sizeAndPos.x + widget.sizeAndPos.w))-1;
+        // find x position of last widget, lastX
+        const lastX = Math.max(...widgets.filter(({sizeAndPos}) => sizeAndPos.y === (lastRowUsed + 1) - sizeAndPos.h).map(({sizeAndPos}) => sizeAndPos.x + sizeAndPos.w));
+        sizeAndPos.x = sizeAndPos.w < largestX - lastX ? lastX : 0;
+    }
+    if (sizeAndPos.y === undefined) {
+        sizeAndPos.y = sizeAndPos.x > 0 ? lastRowUsed - sizeAndPos.h + 1 : lastRowUsed + 1;
+    }
     try {
         const widgetData = {
             type,
@@ -75,29 +87,29 @@ addWidget(
     'Sticky', 
     'Welcome', 
     'This is currently only a prototype. The concept is a personal dash space for organising activities. At the moment functionality is limited.',
-    {w: 2, h: 3, x: 0, y: 0 }
+    {w: 4, h: 5, x: 0, y: 0 }
 );
 addWidget(
-    'Sticky', 
+    'Sticky',  
     'Widgets', 
     'These are the building block. Each has an editiable title. You can resize and drag and drop them.',
-    {w: 2, h: 3, x: 2, y: 1 }
+    {w: 4, h: 6, x: 4, y: 4 }
 );
 addWidget(
     'Sticky', 
     'Sticky', 
     'A type of Widget. Currently the only type available for the prototype. It accepts a text input. Future versions will accept and automatically convert image urls, dates, links, and todo lists.',
-    {w: 3, h: 4, x: 2, y: 2 }
+    {w: 4, h: 5, x: 0, y: 6 }
 );
 addWidget(
     'Sticky', 
     'Add Widget', 
     'You may add more widgets using the widgets menu in the bottom right corner.',
-    {w: 2, h: 3, x: 2, y: 3 }
+    {w: 4, h: 5, x: 0, y: 8 }
 );
 addWidget(
     'Sticky', 
     'Delete Widgets', 
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
-    {w: 2, h: 3, x: 4, y: 4 }
+    {w: 4, h: 5, x: 8, y: 8 }
 );

@@ -33,6 +33,7 @@
     overflow: hidden;
     padding: 12px;
     box-sizing: border-box;
+    border: 1px solid #707070;
   }
   h2, input {
     text-decoration: none;
