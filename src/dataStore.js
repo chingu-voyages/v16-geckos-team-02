@@ -1,11 +1,11 @@
-import {
-    writable
-} from 'svelte/store';
+import { writable } from 'svelte/store';
 
 const dashboards = new Map();
 export const activeDashId = Symbol(); // the first dashboard key
 export const getActiveDash = () => dashboards.get(activeDashId);
 export const getWidget = ref => getActiveDash().widgets.get(ref);
+const getWidgetsArray = () => Array.from(getActiveDash().widgets.values());
+const lastUsedRow = () => Math.max(...getWidgetsArray().map(widget => widget.sizeAndPos.y + widget.sizeAndPos.h))-1;
 
 export const addDash = (title, ref = Symbol()) => {
     try {
@@ -19,7 +19,19 @@ export const addDash = (title, ref = Symbol()) => {
         // TODO decide how to handle the exception
     }
 }
-export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 2, h: 2, x: 0, y: 0}) => {
+export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 4, h: 5}) => {
+    const lastRowUsed = lastUsedRow();
+    if (sizeAndPos.x === undefined) {
+        const widgets = getWidgetsArray();
+        // find largest x position used, largestX
+        const largestX = Math.max(...widgets.map(widget => widget.sizeAndPos.x + widget.sizeAndPos.w))-1;
+        // find x position of last widget, lastX
+        const lastX = Math.max(...widgets.filter(({sizeAndPos}) => sizeAndPos.y === (lastRowUsed + 1) - sizeAndPos.h).map(({sizeAndPos}) => sizeAndPos.x + sizeAndPos.w));
+        sizeAndPos.x = sizeAndPos.w < largestX - lastX ? lastX : 0;
+    }
+    if (sizeAndPos.y === undefined) {
+        sizeAndPos.y = sizeAndPos.x > 0 ? lastRowUsed - sizeAndPos.h + 1 : lastRowUsed + 1;
+    }
     try {
         const widgetData = {
             type,
