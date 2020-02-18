@@ -16,7 +16,6 @@
   let _widgetsCount = getActiveDash()._widgetsCount;
   const storeWidgetSizeAndPos = item => {
     const {w, h, x, y} = item;
-    console.log(item)
     setWidgetSizeAndPos(item.id, {w, h, x, y});
   }
    //Grid Layout
@@ -26,6 +25,9 @@
     widgets.forEach((ref, i) => {
       let {w, h, x, y} = getWidget(ref).sizeAndPos;
       let newItem = gridHelp.item({w, h, x, y, id: ref});
+      if (x+w >= $cols) {
+        newItem = {...newItem, ...gridHelp.findSpaceForItem(newItem, items_arr, $cols)};
+      }
       items_arr = gridHelp.appendItem(newItem, items_arr, $cols);
     });
   };
@@ -36,7 +38,6 @@
       }
   });
   const handleWindowResize = () => {
-    console.log($cols)
     cols.update(getNOfCols);
     generateGridItems();
   };
