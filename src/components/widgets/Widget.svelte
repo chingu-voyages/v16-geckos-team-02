@@ -27,6 +27,7 @@
 <style>
   div {
     display: grid;
+    grid-template-rows: 80px auto;
     place-items: start center;
     width: 100%;
     height: 100%;

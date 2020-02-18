@@ -54,9 +54,11 @@
 </div>
 
 <style>
-  div {
+  .grid-container {
     width: 100%;
     height: 100%;
+    padding: 20px;
+    padding-bottom: 15vh;
   }
   .content {
     width: 100%;
@@ -65,12 +67,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: large;
-  }
-  :global(.svlt-grid-shadow) {
-    background: pink;
-  }
-  :global(.svlt-grid-container) {
-    background: #eee;
+    border: 1px solid #707070;
   }
 </style>
