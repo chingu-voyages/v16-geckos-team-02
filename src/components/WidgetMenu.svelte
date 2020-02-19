@@ -2,45 +2,33 @@
   import { addWidget } from '../dataStore.js';
   import Add from './buttons/Add.svelte';
   import Trash from './buttons/Trash.svelte';
-  let menuOpen = false;
+  import Toggler from '../utils/toggler.js';
+
+  let menuIsOpen = false;
+  const menu = new Toggler(state => menuIsOpen = state);
   let trashActive = false;
-  
-  const closeMenu = () => {
-    setTimeout(() => { 
-      if (menuOpen) { // timeout and latch so runs after toggle
-        menuOpen = false;
-      }
-    }, 0);
-    window.removeEventListener('click', closeMenu, {capture : true});
-  }
-  const openMenu = () => {
-    menuOpen = true;
-    window.addEventListener('click', closeMenu, {capture : true});
-  }
-  const toggleMenu = () => {menuOpen ? closeMenu() : openMenu()};
-
   const toggleTrash = () => {trashActive = !trashActive};
-
   const add = type => {
     addWidget(type);
-    closeMenu();
-  }
+  };
 </script>
   
-<nav>
-  <Trash active={trashActive} on:trash={toggleTrash} on:trash /> <!-- the 2nd on:trash is to pass the event out to App -->
-    {#if menuOpen}
-      <img class="cancel" src="/images/cancelIcon.svg" alt="x" />
-      <div>
-        <button on:click={() => add('Sticky')}>
-          <h3>Sticky</h3> 
-          <img src="/images/addIcon.svg" alt="+" />
-        </button>
-      </div>
-    {/if}
-  <h2>Widgets</h2>
-  <Add active={menuOpen} on:add={toggleMenu} />
-</nav>
+<div class="menuArea">
+  <nav>
+    <Trash active={trashActive} on:trash={toggleTrash} on:trash /> <!-- the 2nd on:trash is to pass the event out to App -->
+      {#if menuIsOpen}
+        <img class="cancel" src="/images/cancelIcon.svg" alt="x" />
+        <div class="menu">
+          <button on:click={() => add('Sticky')}>
+            <h3>Sticky</h3> 
+            <img src="/images/addIcon.svg" alt="+" />
+          </button>
+        </div>
+      {/if}
+    <h2>Widgets</h2>
+    <Add active={menuIsOpen} on:add={menu.toggle} />
+  </nav>
+</div>
   
 <style>
   nav {
