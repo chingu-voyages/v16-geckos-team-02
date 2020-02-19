@@ -13,3 +13,10 @@
 	<Dash />
     <WidgetMenu on:trash={activateTrash} />
 </main>
+
+<style>
+	main {
+		width: 100%;
+		overflow-x: hidden;
+	}
+</style>
