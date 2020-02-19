@@ -74,5 +74,6 @@
     height: 100%;
     padding: 20px;
     padding-bottom: 15vh;
+    box-sizing: border-box;
   }
 </style>
