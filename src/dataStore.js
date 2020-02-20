@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-const dashboards = new Map();
+export const dashboards = new Map();
 export const activeDashId = Symbol(); // the first dashboard key
 export const getActiveDash = () => dashboards.get(activeDashId);
 export const getWidget = ref => getActiveDash().widgets.get(ref);

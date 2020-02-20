@@ -10,7 +10,6 @@
   const toggleTrash = () => {trashActive = !trashActive};
   const add = type => {
     addWidget(type);
-    closeMenu();
   };
 </script>
   
