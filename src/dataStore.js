@@ -87,29 +87,29 @@ addWidget(
     'Sticky', 
     'Welcome', 
     'This is currently only a prototype. The concept is a personal dash space for organising activities. At the moment functionality is limited.',
-    {w: 4, h: 5, x: 0, y: 0 }
+    {w: 8, h: 5, x: 0, y: 0 }
 );
 addWidget(
     'Sticky',  
     'Widgets', 
     'These are the building block. Each has an editiable title. You can resize and drag and drop them.',
-    {w: 4, h: 6, x: 4, y: 4 }
+    {w: 8, h: 6, x: 8, y: 4 }
 );
 addWidget(
     'Sticky', 
     'Sticky', 
     'A type of Widget. Currently the only type available for the prototype. It accepts a text input. Future versions will accept and automatically convert image urls, dates, links, and todo lists.',
-    {w: 4, h: 5, x: 0, y: 6 }
+    {w: 8, h: 5, x: 0, y: 6 }
 );
 addWidget(
     'Sticky', 
     'Add Widget', 
     'You may add more widgets using the widgets menu in the bottom right corner.',
-    {w: 4, h: 5, x: 0, y: 8 }
+    {w: 8, h: 5, x: 0, y: 8 }
 );
 addWidget(
     'Sticky', 
     'Delete Widgets', 
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
-    {w: 4, h: 5, x: 8, y: 8 }
+    {w: 8, h: 5, x: 16, y: 8 }
 );

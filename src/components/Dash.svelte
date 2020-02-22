@@ -10,11 +10,12 @@
   let widgets = [];
   let fillEmpty = false;
 
-  const approxColumnSizePx = 100;
-  const cols = writable(20);
+  const approxColumnSizePx = 50;
+  const cols = writable(40);
   const getNOfCols = () => {
-    const windowWidth = document.documentElement.clientWidth;
-    return Math.floor(windowWidth/approxColumnSizePx);
+    const gridWidth = document.getElementById('gridContainer').clientWidth;
+    const nColsFitInWindow = Math.round(gridWidth/approxColumnSizePx);
+    return nColsFitInWindow - (nColsFitInWindow%2);
   }
   let _widgetsCount = getActiveDash()._widgetsCount;
   const storeWidgetSizeAndPos = item => {
@@ -62,7 +63,7 @@
   };
 </script>
 
-<div class="grid-container">
+<div id="gridContainer" class="grid-container">
   <Grid {fillEmpty} items={items_arr} bind:items={items_arr} cols={$cols} let:item rowHeight={50} gap={20} on:adjust={event => storeWidgetSizeAndPos(event.detail.focuesdItem)} on:resize={handleWindowResize} on:mount={handleWindowResize}>
       <Widget ref={item.id} />
   </Grid>
@@ -74,5 +75,6 @@
     height: 100%;
     padding: 20px;
     padding-bottom: 15vh;
+    box-sizing: border-box;
   }
 </style>
