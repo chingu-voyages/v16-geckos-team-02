@@ -25,26 +25,28 @@
     ]; // TODO get list from dataStore, it should return an array [{title, ref},]
 
     const generateOrderedNavArray = (activeId) => {
-        const activeIndex = dashList.findIndex(dash => dash.ref === activeId);
-        if (activeIndex < 0) {
+        const pivotIndex = dashList.findIndex(dash => dash.ref === activeId);
+        if (pivotIndex < 0) {
             throw 'Can not find active dash';
         }
-        const used = new Set();
-        let listEnd = [];
-        let listStart = []
+        const indexesOfDashesAdded = new Set();
+        let afterPivotArr = [];
+        let beforePivotArr = [];
         for (let i=0;i<9;i++) {
-            let relativeIndex = activeIndex - 4 + i; // maintain activeIndex as middle of a 9 length segment
+            let relativeIndex = pivotIndex - 4 + i; // maintain pivotIndex as middle of a 9 length segment
             let loopedIndex = (dashList.length + relativeIndex) % dashList.length; // loop within dashList
-            if (activeIndex === loopedIndex) {
+            if (pivotIndex === loopedIndex) { // skip adding the middle/active dash/pivot
                 continue;
             }
-            let isARepeat = used.has(loopedIndex);
-            used.add(loopedIndex);
+            let isARepeat = indexesOfDashesAdded.has(loopedIndex);
+            indexesOfDashesAdded.add(loopedIndex);
+            // use empty placeholder item if looped dash is already added within first 5/is visible, this allows looping smaller lists without seeing repeats
             let item = (dashList.length >= 5 || !isARepeat) ? dashList[loopedIndex] : {title: '', ref: null};
-            let isBeforeActive = relativeIndex < activeIndex;
-            isBeforeActive ? isARepeat ? listStart.unshift(item) : listStart.push(item) : listEnd.push(item);
+            let isBeforePivot = relativeIndex < pivotIndex;
+            isBeforePivot ? isARepeat ? beforePivotArr.unshift(item) : beforePivotArr.push(item) : afterPivotArr.push(item);
         }
-        return [...listStart, dashList[activeIndex], ...listEnd];
+        const pivot = dashList[pivotIndex];
+        return [...beforePivotArr, pivot, ...afterPivotArr];
     };
     let displayArr = generateOrderedNavArray(activeDashId);
 
@@ -96,18 +98,17 @@
         </div>
     {:else}
         <div class="carousel {animationClass}">
-            <button class="prev-prev-prev-prev">{displayArr[0].title}</button>
-        {#if !showNewDashInput}    
-            <button class="prev-prev-prev">{displayArr[1].title}</button>
-        {/if}
-            <button class="prev-prev" on:click={() => setActiveDash(displayArr[2].ref, 'bck-bck')}>{displayArr[2].title}</button>
+        {#if !showNewDashInput} <!-- if displaying input make room by removing prev-4 -->
+            <button class="prev-4">{displayArr[0].title}</button>
+        {/if}  
+            <button class="prev-3">{displayArr[1].title}</button>
+            <button class="prev-2" on:click={() => setActiveDash(displayArr[2].ref, 'bck-bck')}>{displayArr[2].title}</button>
             <button class="prev" on:click={() => setActiveDash(displayArr[3].ref, 'bck')}>{displayArr[3].title}</button>
         {#if showNewDashInput}
-            <button class="prev">{$_title}</button>
+            <button class="prev">{displayArr[4].title}</button>
             <div class="current">
                 <input on:change={() => createDash(event.target.value)} autofocus />
             </div>
-
         {:else}
             <div class="current">
             {#if editingTitle}
@@ -118,9 +119,9 @@
             </div>
         {/if}
             <button class="next" on:click={() => setActiveDash(displayArr[5].ref, 'fwd')}>{displayArr[5].title}</button>
-            <button class="next-next" on:click={() => setActiveDash(displayArr[6].ref, 'fwd-fwd')}>{displayArr[6].title}</button>
-            <button class="next-next-next">{displayArr[7].title}</button>
-            <button class="next-next-next-next">{displayArr[7].title}</button>
+            <button class="next-2" on:click={() => setActiveDash(displayArr[6].ref, 'fwd-fwd')}>{displayArr[6].title}</button>
+            <button class="next-3">{displayArr[7].title}</button>
+            <button class="next-4">{displayArr[7].title}</button>
         </div>
     {/if}
     </div>
@@ -209,14 +210,14 @@ button, input {
 .prev, .next {
     font-size: 24px;
 }
-.prev-prev, .next-next {
+.prev-2, .next-2 {
     font-size: 16px;
 }
-.prev-prev-prev, .next-next-next, .prev-prev-prev-prev, .next-next-next-next {
+.prev-3, .next-3, .prev-4, .next-4 {
     font-size: 12px;
 }
 
-.forward-animation .current, .backward-animation .current, .forward-animation .prev, .backward-animation .next, .forward-animation .next-next, .backward-animation .prev-prev {
+.forward-animation .current, .backward-animation .current, .forward-animation .prev, .backward-animation .next, .forward-animation .next-2, .backward-animation .prev-2 {
     animation: shrink var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes shrink {
@@ -224,7 +225,7 @@ button, input {
     to { transform: scale(0.75) }
 }
 
-.forward-animation .next, .backward-animation .prev, .forward-animation .prev-prev, .backward-animation .next-next {
+.forward-animation .next, .backward-animation .prev, .forward-animation .prev-2, .backward-animation .next-2 {
     animation: grow var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes grow {
