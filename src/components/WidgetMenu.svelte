@@ -69,6 +69,12 @@
       "trash title add";
     align-items: center;
     background: rgba(255,255,255,0.5);
+    position: relative;
+  }
+  @media only screen and (min-width: 780px) {
+    nav {
+      right: calc(15vw - 78px - 39px);
+    }
   }
   .menu {
     grid-area: menu;
