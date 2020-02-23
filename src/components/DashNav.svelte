@@ -83,7 +83,7 @@
 <style>
 :root {
     --animation-speed: 500ms;
-    --animation-curve: ease-in;
+    --animation-curve: ease-in-out;
     --carousel-size: 150%;
 }
 nav { 
@@ -189,14 +189,14 @@ button, input {
 }
 @keyframes forward {
     from { transform: translateX(0%) }
-    to { transform: translateX(-11%) }
+    to { transform: translateX(-14.2%) }
 }
 .backward-animation {
     animation: backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes backward {
     from { transform: translateX(0%) }
-    to { transform: translateX(11%) }
+    to { transform: translateX(14.2%) }
 }
 
 @media only screen and (max-width: 768px) {
