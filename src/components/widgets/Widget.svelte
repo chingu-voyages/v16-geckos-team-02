@@ -1,5 +1,5 @@
 <script>
-    import { getWidget, activeDashId ,removeWidget} from '../../dataStore';
+    import { getWidget, removeWidget} from '../../dataStore';
     import Sticky from './Sticky.svelte';
     import Trash from '../buttons/Trash.svelte';
     export let ref;

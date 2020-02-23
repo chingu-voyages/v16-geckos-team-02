@@ -1,20 +1,21 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
-export const dashboards = new Map();
-export const activeDashId = Symbol(); // the first dashboard key
-export const getActiveDash = () => dashboards.get(activeDashId);
+export const dashboards = [];
+export let activeDashIndex = writable(2); 
+export const setActiveDashIndex = i => activeDashIndex.update(() => i);
+export const getActiveDash = () => dashboards[get(activeDashIndex)];
 export const getWidget = ref => getActiveDash().widgets.get(ref);
 const getWidgetsArray = () => Array.from(getActiveDash().widgets.values());
 const lastUsedRow = () => Math.max(...getWidgetsArray().map(widget => widget.sizeAndPos.y + widget.sizeAndPos.h))-1;
 
-export const addDash = (title, ref = Symbol()) => {
+export const addDash = (title = '') => {
     try {
         const dashData = {
             _title: writable(title),
             widgets: new Map(),
             _widgetsCount: writable(0)
         };
-        dashboards.set(ref, dashData);
+        dashboards.push(dashData);
     } catch (e) {
         // TODO decide how to handle the exception
     }
@@ -41,34 +42,25 @@ export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 4, h: 5}
         }
         getActiveDash().widgets.set(Symbol(), widgetData);
         getActiveDash()._widgetsCount.update(n => n + 1);
-
     } catch (e) {
         // TODO decide how to handle the exception
     }
 }
 
-export const removeDash = ref => {
+export const removeDash = index => {
     try {
-        dashboards.delete(ref);
+        dashboards.splice(index, 1);
     } catch (e) {
         // TODO decide how to handle the exception
     }
 }
 
-export const removeWidget = (widgetRef, dashRef = activeDashId) => {
+export const removeWidget = (widgetRef, dashRef = get(activeDashIndex)) => {
     try {
-        if(dashboards.get(dashRef).widgets.delete(widgetRef))
+        if(dashboards[dashRef].widgets.delete(widgetRef))
         {
-            dashboards.get(dashRef)._widgetsCount.update(n => n - 1);
+            dashboards[dashRef]._widgetsCount.update(n => n - 1);
         }
-    } catch (e) {
-        // TODO decide how to handle the exception
-    }
-}
-
-export const updateDash = (title, ref) => {
-    try {
-        dashboards.get(ref)._title.set(title);
     } catch (e) {
         // TODO decide how to handle the exception
     }
@@ -82,7 +74,9 @@ export const setWidgetSizeAndPos = (ref, data) => {
     }
 }
 
-addDash('Prototype', activeDashId);
+addDash('one');
+addDash('two');
+addDash('Prototype');
 addWidget(
     'Sticky', 
     'Welcome', 
@@ -113,3 +107,6 @@ addWidget(
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
     {w: 8, h: 5, x: 16, y: 8 }
 );
+addDash('three');
+addDash('four');
+addDash('five');
