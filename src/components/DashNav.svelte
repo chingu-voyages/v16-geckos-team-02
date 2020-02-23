@@ -1,5 +1,5 @@
 <script>
-    import {activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
+    import {_activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
     import { get } from 'svelte/store';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
@@ -9,14 +9,13 @@
     
     let trashIsOpen = false;
     const trash = new Toggler(state => trashIsOpen = state);
-    $: _title = dashboards[$activeDashIndex]._title;
     let editingTitle = false;
 
-    const makeNavIndexArray = activeIndex => {
+    const makeNavIndexArray = (activeIndex) => {
         let arr = [];
         for (let i=0;i<7;i++) {
             if (dashboards.length < 5) { // no loop
-                arr.push(i-3-dashboards.length);
+                arr.push((activeIndex+i-3));
             }
             else {
                 const loopedIndex = (dashboards.length + activeIndex + i - 3) % dashboards.length;
@@ -25,11 +24,13 @@
         }
         return arr
     }
-    $: navIndexArray = makeNavIndexArray($activeDashIndex);
+    $: navIndexArray = makeNavIndexArray($_activeDashIndex);
+    $: _title = dashboards[$_activeDashIndex]._title;
 
     let animationClass = '';
     const setActiveDash = shift => {
-        if (shift !== 0) {
+        const nextDashIndex = (dashboards.length + $_activeDashIndex + shift) % dashboards.length;
+        if (shift !== 0 && nextDashIndex !== $_activeDashIndex) {
             if (shift > 0) {
                 animationClass = 'forward-animation';
             }
@@ -37,11 +38,32 @@
                 animationClass = 'backward-animation';
             }
             setTimeout(() => {
-                setActiveDashIndex((dashboards.length + $activeDashIndex + shift) % dashboards.length);
+                setActiveDashIndex(nextDashIndex);
                 animationClass = '';
             }, 500);
         }
     } 
+
+    let previousDash = $_activeDashIndex;
+    const addNewDash = () => {
+        previousDash = $_activeDashIndex;
+        addDash('');
+        editingTitle = true;
+        setActiveDashIndex(dashboards.length-1);
+    }
+
+    const closeEditingTitle = () => {
+        editingTitle = false;
+        if (event.target.value === '') {
+            removeDash(dashboards.length-1);
+            setActiveDashIndex(previousDash);
+        }
+    }
+
+    const deleteDash = i => {
+        removeDash(i);
+        setActiveDashIndex((dashboards.length + $_activeDashIndex - 1) % dashboards.length);
+    }
 
 </script>
 
@@ -52,7 +74,7 @@
         {#if trashIsOpen}
             <div class="trashMenu">
             {#each dashboards as dash, i}
-                <button on:click={() => removeDash(i)}>
+                <button on:click={() => deleteDash(i)}>
                     <h3>{get(dash._title)}</h3> 
                     <img src="/images/trashIcon.svg" alt="-" />
                 </button>
@@ -61,10 +83,10 @@
         {:else}
         <div class="carousel {animationClass}">
             {#each navIndexArray as dashIndex, i}
-                {#if dashIndex === $activeDashIndex} 
+                {#if dashIndex === $_activeDashIndex} 
                     <div class="current">
                         {#if editingTitle}
-                            <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
+                            <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />
                         {:else}
                             <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
                         {/if}
@@ -76,14 +98,14 @@
         </div>
         {/if}
     </div>
-    <Add on:add={addDash} />
+    <Add on:add={addNewDash} />
     <Right on:right={() => setActiveDash(1)} />
 </nav>
 
 <style>
 :root {
     --animation-speed: 500ms;
-    --animation-curve: ease-in;
+    --animation-curve: ease-in-out;
     --carousel-size: 150%;
 }
 nav { 
@@ -189,14 +211,14 @@ button, input {
 }
 @keyframes forward {
     from { transform: translateX(0%) }
-    to { transform: translateX(-11%) }
+    to { transform: translateX(-14.2%) }
 }
 .backward-animation {
     animation: backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes backward {
     from { transform: translateX(0%) }
-    to { transform: translateX(11%) }
+    to { transform: translateX(14.2%) }
 }
 
 @media only screen and (max-width: 768px) {

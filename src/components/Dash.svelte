@@ -1,65 +1,65 @@
 <script>
-  import { getActiveDash, getWidget, setWidgetSizeAndPos } from "../dataStore";
+  import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
   import { writable } from 'svelte/store';
-  import { beforeUpdate } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
 
+  $: _widgetsCount = dashboards[$_activeDashIndex]._widgetsCount;
+  let widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
   let items_arr = [];
-  let widgets = [];
-  let fillEmpty = false;
-
-  const approxColumnSizePx = 50;
+  $: {
+    if ($_widgetsCount !== widgets.length) {
+      widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
+      items_arr = generateGridItems(widgets, $cols);
+    }
+  } 
   const cols = writable(40);
+  let fillEmpty = false;
+  const findSpaceForAll = false;
+  const approxColumnSizePx = 50;
+
   const getNOfCols = () => {
     const gridWidth = document.getElementById('gridContainer').clientWidth;
     const nColsFitInWindow = Math.round(gridWidth/approxColumnSizePx);
     return nColsFitInWindow - (nColsFitInWindow%2);
   }
-  let _widgetsCount = getActiveDash()._widgetsCount;
   const storeWidgetSizeAndPos = item => {
     const {w, h, x, y} = item;
     setWidgetSizeAndPos(item.id, {w, h, x, y});
   }
-  const centerGridItems = () => {
+  const centerGridItems = arr => {
     // find highest x position 
-    const highestXPos = Math.max(...items_arr.map(item => item.x + item.w));
+    const highestXPos = Math.max(...arr.map(item => item.x + item.w));
     // diff between cols and highestXPos divided by two
     const halfDiff = Math.floor((($cols) - highestXPos) / 2);
     // shift all x positions up by halfDiff
-    items_arr = items_arr.map(item => { 
+    return arr.map(item => { 
       return  {...item, ...{x: item.x + halfDiff}}
     });
   };
-  const generateGridItems = () => {
-    items_arr = [];
-    widgets = Array.from(getActiveDash().widgets.keys());
+  const generateGridItems = (widgets, cols) => {
+    let arr = [];
     widgets.forEach((ref, i) => {
       let {w, h, x, y} = getWidget(ref).sizeAndPos;
-      if (w > $cols) { // width of item is larger then grid:
-        w = $cols; // prevent items overflowing x
+      if (w > cols) { // width of item is larger then grid:
+        w = cols; // prevent items overflowing x
         fillEmpty = true; // fill empty spaces
       }
       else {
         fillEmpty = false;
       }
       let newItem = gridHelp.item({w, h, x, y, id: ref});
-      if (x+w >= $cols) {
-        newItem = {...newItem, ...gridHelp.findSpaceForItem(newItem, items_arr, $cols)};
+      if (x+w >= cols || findSpaceForAll) {
+        newItem = {...newItem, ...gridHelp.findSpaceForItem(newItem, arr, cols)};
       }
-      items_arr = gridHelp.appendItem(newItem, items_arr, $cols);
+      arr = gridHelp.appendItem(newItem, arr, cols);
     });
-    centerGridItems();
+    return centerGridItems(arr);
   };
-    beforeUpdate(() => {
-      if ($_widgetsCount !== widgets.length) {
-        generateGridItems();
-      }
-  });
   const handleWindowResize = () => {
     cols.update(getNOfCols);
-    generateGridItems();
+    items_arr = generateGridItems(widgets, $cols);
   };
 </script>
 
