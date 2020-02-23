@@ -1,5 +1,6 @@
 <script>
-    import { getActiveDash, activeDashId, removeDash, addDash } from '../dataStore';
+    import {activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
+    import { get } from 'svelte/store';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
     import Trash from './buttons/Trash.svelte';
@@ -8,133 +9,83 @@
     
     let trashIsOpen = false;
     const trash = new Toggler(state => trashIsOpen = state);
-    let showNewDashInput = false;
-    const newDashInput = new Toggler(state => showNewDashInput = state);
-    let _title = getActiveDash()._title;
+    $: _title = dashboards[$activeDashIndex]._title;
     let editingTitle = false;
 
-    const dashList = [ // just for testing
-        {title: 'one', ref: 1},
-        {title: 'two', ref: 2}, 
-        {title: 'three', ref: 3},
-        {title: $_title, ref: activeDashId}, 
-        {title: 'five', ref: 5},
-        {title: 'six', ref: 6},  
-        {title: 'seven', ref: 7},
-        {title: 'eight', ref: 8}
-    ]; // TODO get list from dataStore, it should return an array [{title, ref},]
-
-    const generateOrderedNavArray = (activeId) => {
-        const pivotIndex = dashList.findIndex(dash => dash.ref === activeId);
-        if (pivotIndex < 0) {
-            throw 'Can not find active dash';
-        }
-        const indexesOfDashesAdded = new Set();
-        let afterPivotArr = [];
-        let beforePivotArr = [];
-        for (let i=0;i<9;i++) {
-            let relativeIndex = pivotIndex - 4 + i; // maintain pivotIndex as middle of a 9 length segment
-            let loopedIndex = (dashList.length + relativeIndex) % dashList.length; // loop within dashList
-            if (pivotIndex === loopedIndex) { // skip adding the middle/active dash/pivot
-                continue;
+    const makeNavIndexArray = activeIndex => {
+        let arr = [];
+        for (let i=0;i<7;i++) {
+            if (dashboards.length < 5) { // no loop
+                arr.push(i-3-dashboards.length);
             }
-            let isARepeat = indexesOfDashesAdded.has(loopedIndex);
-            indexesOfDashesAdded.add(loopedIndex);
-            // use empty placeholder item if looped dash is already added within first 5/is visible, this allows looping smaller lists without seeing repeats
-            let item = (dashList.length >= 5 || !isARepeat) ? dashList[loopedIndex] : {title: '', ref: null};
-            let isBeforePivot = relativeIndex < pivotIndex;
-            isBeforePivot ? isARepeat ? beforePivotArr.unshift(item) : beforePivotArr.push(item) : afterPivotArr.push(item);
+            else {
+                const loopedIndex = (dashboards.length + activeIndex + i - 3) % dashboards.length;
+                arr.push(loopedIndex);
+            }
         }
-        const pivot = dashList[pivotIndex];
-        return [...beforePivotArr, pivot, ...afterPivotArr];
-    };
-    let displayArr = generateOrderedNavArray(activeDashId);
-
-    const createDash = title => {
-        !showNewDashInput && addDash(title);
+        return arr
     }
-    
+    $: navIndexArray = makeNavIndexArray($activeDashIndex);
+
     let animationClass = '';
-    const setActiveDash = (ref, index) => {
-        if (!ref) {
-            return
+    const setActiveDash = shift => {
+        if (shift !== 0) {
+            if (shift > 0) {
+                animationClass = 'forward-animation';
+            }
+            else {
+                animationClass = 'backward-animation';
+            }
+            setTimeout(() => {
+                setActiveDashIndex((dashboards.length + $activeDashIndex + shift) % dashboards.length);
+                animationClass = '';
+            }, 500);
         }
-        animationClass = '';
-        switch(index) {
-            case 'fwd': 
-            animationClass = 'forward-animation';
-            break;
-            case 'fwd-fwd': 
-            animationClass = 'forward-forward-animation';
-            break;
-            case 'bck': 
-            animationClass = 'backward-animation';
-            break;
-            case 'bck-bck': 
-            animationClass = 'backward-backward-animation';
-            break;
-        }
-        setTimeout(() => {
-            displayArr = generateOrderedNavArray(ref);
-            // TODO setActiveDash: make setActiveDash in dataStore and import it
-            animationClass = '';
-        }, 500);
     } 
 
 </script>
 
 <nav>
-    <Left on:left={() => setActiveDash(displayArr[3].ref, 'bck')} />
+    <Left on:left={() => setActiveDash(-1)} />
     <Trash active={trashIsOpen} on:trash={trash.toggle} cancelPos="right" />
     <div class="container">
-    {#if trashIsOpen}
-        <div class="trashMenu">
-        {#each dashList as dash}
-            <button on:click={() => removeDash(dash.ref)}>
-                <h3>{dash.title}</h3> 
-                <img src="/images/trashIcon.svg" alt="-" />
-            </button>
-        {/each}
-        </div>
-    {:else}
-        <div class="carousel {animationClass}">
-        {#if !showNewDashInput} <!-- if displaying input make room by removing prev-4 -->
-            <button class="prev-4">{displayArr[0].title}</button>
-        {/if}  
-            <button class="prev-3">{displayArr[1].title}</button>
-            <button class="prev-2" on:click={() => setActiveDash(displayArr[2].ref, 'bck-bck')}>{displayArr[2].title}</button>
-            <button class="prev" on:click={() => setActiveDash(displayArr[3].ref, 'bck')}>{displayArr[3].title}</button>
-        {#if showNewDashInput}
-            <button class="prev">{displayArr[4].title}</button>
-            <div class="current">
-                <input on:change={() => createDash(event.target.value)} autofocus />
+        {#if trashIsOpen}
+            <div class="trashMenu">
+            {#each dashboards as dash, i}
+                <button on:click={() => removeDash(i)}>
+                    <h3>{get(dash._title)}</h3> 
+                    <img src="/images/trashIcon.svg" alt="-" />
+                </button>
+            {/each}
             </div>
         {:else}
-            <div class="current">
-            {#if editingTitle}
-                <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
-            {:else}
-                <button class="active-dash-title" on:click={() => editingTitle = true}>{displayArr[4].title}</button>
-            {/if}
-            </div>
-        {/if}
-            <button class="next" on:click={() => setActiveDash(displayArr[5].ref, 'fwd')}>{displayArr[5].title}</button>
-            <button class="next-2" on:click={() => setActiveDash(displayArr[6].ref, 'fwd-fwd')}>{displayArr[6].title}</button>
-            <button class="next-3">{displayArr[7].title}</button>
-            <button class="next-4">{displayArr[7].title}</button>
+        <div class="carousel {animationClass}">
+            {#each navIndexArray as dashIndex, i}
+                {#if dashIndex === $activeDashIndex} 
+                    <div class="current">
+                        {#if editingTitle}
+                            <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
+                        {:else}
+                            <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
+                        {/if}
+                    </div>
+                {:else}
+                    <button class="nav-button-{i}" on:click={() => setActiveDash(i > 3 ? 1 : -1)}>{dashboards[dashIndex] ? get(dashboards[dashIndex]._title) : ''}</button>
+                {/if}
+            {/each}
         </div>
-    {/if}
+        {/if}
     </div>
-    <Add active={showNewDashInput} on:add={newDashInput.toggle} />
-    <Right on:right={() => setActiveDash(displayArr[5].ref, 'fwd')} />
+    <Add on:add={addDash} />
+    <Right on:right={() => setActiveDash(1)} />
 </nav>
 
 <style>
-    :root {
-        --animation-speed: 0.5s;
-        --animation-curve: ease-in;
-        --carousel-size: 200%;
-    }
+:root {
+    --animation-speed: 500ms;
+    --animation-curve: ease-in;
+    --carousel-size: 150%;
+}
 nav { 
     width: 100%;
     display: grid;
@@ -186,9 +137,9 @@ nav {
     width: var(--carousel-size);
     height: 68px;
     position: relative;
-    left: calc(var(--carousel-size) / -4);
+    left: calc(var(--carousel-size) / -6);
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     place-items: center center;
 }
 button, input {
@@ -202,22 +153,22 @@ button, input {
     height: 50px;
 }
 .current {
-    min-width: 120px;
+    min-width: 150px;
     font-size: 32px;
     display: grid;
     place-items: center center;
 }
-.prev, .next {
+.nav-button-2, .nav-button-4 {
     font-size: 24px;
 }
-.prev-2, .next-2 {
+.nav-button-1, .nav-button-5 {
     font-size: 16px;
 }
-.prev-3, .next-3, .prev-4, .next-4 {
+.nav-button-0, .nav-button-6 {
     font-size: 12px;
 }
 
-.forward-animation .current, .backward-animation .current, .forward-animation .prev, .backward-animation .next, .forward-animation .next-2, .backward-animation .prev-2 {
+.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-2, .backward-animation .nav-button-4, .forward-animation .nav-button-5, .backward-animation .nav-button-1 {
     animation: shrink var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes shrink {
@@ -225,7 +176,7 @@ button, input {
     to { transform: scale(0.75) }
 }
 
-.forward-animation .next, .backward-animation .prev, .forward-animation .prev-2, .backward-animation .next-2 {
+.forward-animation .nav-button-4, .backward-animation .nav-button-2, .forward-animation .nav-button-1, .backward-animation .nav-button-5 {
     animation: grow var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes grow {
@@ -240,13 +191,6 @@ button, input {
     from { transform: translateX(0%) }
     to { transform: translateX(-11%) }
 }
-.forward-forward-animation {
-    animation: forward-forward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
-}
-@keyframes forward-forward {
-    from { transform: translateX(0%) }
-    to { transform: translateX(-22%) }
-}
 .backward-animation {
     animation: backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
@@ -254,14 +198,6 @@ button, input {
     from { transform: translateX(0%) }
     to { transform: translateX(11%) }
 }
-.backward-backward-animation {
-    animation: backward-backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
-}
-@keyframes backward-backward {
-    from { transform: translateX(0%) }
-    to { transform: translateX(22%) }
-}
-
 
 @media only screen and (max-width: 768px) {
     nav {
