@@ -1,7 +1,7 @@
 
 <script>
     import { createEventDispatcher } from 'svelte';
-    export let active;
+    export let active = false;
     export let cancelPos = 'top';
     const dispatch = createEventDispatcher();
     const trash = () => {

@@ -20,19 +20,7 @@ export const addDash = (title = '') => {
         // TODO decide how to handle the exception
     }
 }
-export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 4, h: 5}) => {
-    const lastRowUsed = lastUsedRow();
-    if (sizeAndPos.x === undefined) {
-        const widgets = getWidgetsArray();
-        // find largest x position used, largestX
-        const largestX = Math.max(...widgets.map(widget => widget.sizeAndPos.x + widget.sizeAndPos.w))-1;
-        // find x position of last widget, lastX
-        const lastX = Math.max(...widgets.filter(({sizeAndPos}) => sizeAndPos.y === (lastRowUsed + 1) - sizeAndPos.h).map(({sizeAndPos}) => sizeAndPos.x + sizeAndPos.w));
-        sizeAndPos.x = sizeAndPos.w < largestX - lastX ? lastX : 0;
-    }
-    if (sizeAndPos.y === undefined) {
-        sizeAndPos.y = sizeAndPos.x > 0 ? lastRowUsed - sizeAndPos.h + 1 : lastRowUsed + 1;
-    }
+export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 8, h: 5, x: Infinity, y: 0}) => {
     try {
         const widgetData = {
             type,
@@ -77,6 +65,7 @@ export const setWidgetSizeAndPos = (ref, data) => {
 addDash('one');
 addDash('two');
 addDash('Prototype');
+
 addWidget(
     'Sticky', 
     'Welcome', 
@@ -107,6 +96,7 @@ addWidget(
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
     {w: 8, h: 5, x: 16, y: 8 }
 );
+
 addDash('three');
 addDash('four');
 addDash('five');
