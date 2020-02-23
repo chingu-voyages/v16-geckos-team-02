@@ -5,8 +5,6 @@ export let activeDashIndex = writable(2);
 export const setActiveDashIndex = i => activeDashIndex.update(() => i);
 export const getActiveDash = () => dashboards[get(activeDashIndex)];
 export const getWidget = ref => getActiveDash().widgets.get(ref);
-const getWidgetsArray = () => Array.from(getActiveDash().widgets.values());
-const lastUsedRow = () => Math.max(...getWidgetsArray().map(widget => widget.sizeAndPos.y + widget.sizeAndPos.h))-1;
 
 export const addDash = (title = '') => {
     try {
@@ -16,6 +14,7 @@ export const addDash = (title = '') => {
             _widgetsCount: writable(0)
         };
         dashboards.push(dashData);
+        setActiveDashIndex(dashboards.length-1)
     } catch (e) {
         // TODO decide how to handle the exception
     }
@@ -64,8 +63,9 @@ export const setWidgetSizeAndPos = (ref, data) => {
 
 addDash('one');
 addDash('two');
-addDash('Prototype');
-
+addDash('three');
+addDash('four');
+addDash('five');
 addWidget(
     'Sticky', 
     'Welcome', 
@@ -96,7 +96,3 @@ addWidget(
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
     {w: 8, h: 5, x: 16, y: 8 }
 );
-
-addDash('three');
-addDash('four');
-addDash('five');

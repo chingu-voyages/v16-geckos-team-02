@@ -9,14 +9,13 @@
     
     let trashIsOpen = false;
     const trash = new Toggler(state => trashIsOpen = state);
-    $: _title = dashboards[$activeDashIndex]._title;
     let editingTitle = false;
 
     const makeNavIndexArray = activeIndex => {
         let arr = [];
         for (let i=0;i<7;i++) {
             if (dashboards.length < 5) { // no loop
-                arr.push(i-3-dashboards.length);
+                arr.push((activeIndex+i-3));
             }
             else {
                 const loopedIndex = (dashboards.length + activeIndex + i - 3) % dashboards.length;
@@ -26,10 +25,12 @@
         return arr
     }
     $: navIndexArray = makeNavIndexArray($activeDashIndex);
+    $: _title = dashboards[$activeDashIndex]._title;
 
     let animationClass = '';
     const setActiveDash = shift => {
-        if (shift !== 0) {
+        const nextDashIndex = (dashboards.length + $activeDashIndex + shift) % dashboards.length;
+        if (shift !== 0 && nextDashIndex !== $activeDashIndex) {
             if (shift > 0) {
                 animationClass = 'forward-animation';
             }
@@ -37,11 +38,34 @@
                 animationClass = 'backward-animation';
             }
             setTimeout(() => {
-                setActiveDashIndex((dashboards.length + $activeDashIndex + shift) % dashboards.length);
+                setActiveDashIndex(nextDashIndex);
                 animationClass = '';
             }, 500);
         }
     } 
+
+    let previousDash = $activeDashIndex;
+    const addNewDash = () => {
+        previousDash = $activeDashIndex;
+        addDash('');
+        editingTitle = true;
+        setActiveDashIndex(dashboards.length-1);
+    }
+
+    const closeEditingTitle = () => {
+        editingTitle = false;
+        if (event.target.value === '') {
+            removeDash(dashboards.length-1);
+            setActiveDashIndex(previousDash);
+        }
+    }
+
+    const deleteDash = i => {
+        removeDash(i);
+        if ($activeDashIndex === i) {
+            setActiveDashIndex((dashboards.length + $activeDashIndex - 1) % dashboards.length);
+        }
+    }
 
 </script>
 
@@ -52,7 +76,7 @@
         {#if trashIsOpen}
             <div class="trashMenu">
             {#each dashboards as dash, i}
-                <button on:click={() => removeDash(i)}>
+                <button on:click={() => deleteDash(i)}>
                     <h3>{get(dash._title)}</h3> 
                     <img src="/images/trashIcon.svg" alt="-" />
                 </button>
@@ -64,7 +88,7 @@
                 {#if dashIndex === $activeDashIndex} 
                     <div class="current">
                         {#if editingTitle}
-                            <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
+                            <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />
                         {:else}
                             <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
                         {/if}
@@ -76,7 +100,7 @@
         </div>
         {/if}
     </div>
-    <Add on:add={addDash} />
+    <Add on:add={addNewDash} />
     <Right on:right={() => setActiveDash(1)} />
 </nav>
 
