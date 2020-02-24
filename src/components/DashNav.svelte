@@ -1,6 +1,6 @@
 <script>
     import {_activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
-    import { get } from 'svelte/store';
+    import { get, writable } from 'svelte/store';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
     import Trash from './buttons/Trash.svelte';
@@ -25,7 +25,7 @@
         return arr
     }
     $: navIndexArray = makeNavIndexArray($_activeDashIndex);
-    $: _title = dashboards[$_activeDashIndex]._title;
+    $: _title = dashboards[$_activeDashIndex] ? dashboards[$_activeDashIndex]._title : writable(''); // fallback for no dashboards
 
     let animationClass = '';
     const setActiveDash = shift => {
@@ -71,6 +71,7 @@
     <Left on:left={() => setActiveDash(-1)} />
     <Trash active={trashIsOpen} on:trash={trash.toggle} cancelPos="right" />
     <div class="container">
+    {#if dashboards.length > 0}
         {#if trashIsOpen}
             <div class="trashMenu">
             {#each dashboards as dash, i}
@@ -97,6 +98,9 @@
             {/each}
         </div>
         {/if}
+    {:else}
+        <div class="carousel"></div>
+    {/if}
     </div>
     <Add on:add={addNewDash} />
     <Right on:right={() => setActiveDash(1)} />
