@@ -1,5 +1,5 @@
 <script>
-    import {activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
+    import {_activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
     import { get } from 'svelte/store';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
@@ -11,7 +11,7 @@
     const trash = new Toggler(state => trashIsOpen = state);
     let editingTitle = false;
 
-    const makeNavIndexArray = activeIndex => {
+    const makeNavIndexArray = (activeIndex) => {
         let arr = [];
         for (let i=0;i<7;i++) {
             if (dashboards.length < 5) { // no loop
@@ -24,13 +24,13 @@
         }
         return arr
     }
-    $: navIndexArray = makeNavIndexArray($activeDashIndex);
-    $: _title = dashboards[$activeDashIndex]._title;
+    $: navIndexArray = makeNavIndexArray($_activeDashIndex);
+    $: _title = dashboards[$_activeDashIndex]._title;
 
     let animationClass = '';
     const setActiveDash = shift => {
-        const nextDashIndex = (dashboards.length + $activeDashIndex + shift) % dashboards.length;
-        if (shift !== 0 && nextDashIndex !== $activeDashIndex) {
+        const nextDashIndex = (dashboards.length + $_activeDashIndex + shift) % dashboards.length;
+        if (shift !== 0 && nextDashIndex !== $_activeDashIndex) {
             if (shift > 0) {
                 animationClass = 'forward-animation';
             }
@@ -44,9 +44,9 @@
         }
     } 
 
-    let previousDash = $activeDashIndex;
+    let previousDash = $_activeDashIndex;
     const addNewDash = () => {
-        previousDash = $activeDashIndex;
+        previousDash = $_activeDashIndex;
         addDash('');
         editingTitle = true;
         setActiveDashIndex(dashboards.length-1);
@@ -62,9 +62,7 @@
 
     const deleteDash = i => {
         removeDash(i);
-        if ($activeDashIndex === i) {
-            setActiveDashIndex((dashboards.length + $activeDashIndex - 1) % dashboards.length);
-        }
+        setActiveDashIndex((dashboards.length + $_activeDashIndex - 1) % dashboards.length);
     }
 
 </script>
@@ -85,7 +83,7 @@
         {:else}
         <div class="carousel {animationClass}">
             {#each navIndexArray as dashIndex, i}
-                {#if dashIndex === $activeDashIndex} 
+                {#if dashIndex === $_activeDashIndex} 
                     <div class="current">
                         {#if editingTitle}
                             <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />

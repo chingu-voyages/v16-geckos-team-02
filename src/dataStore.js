@@ -1,9 +1,9 @@
 import { writable, get } from 'svelte/store';
 
 export const dashboards = [];
-export let activeDashIndex = writable(2); 
-export const setActiveDashIndex = i => activeDashIndex.update(() => i);
-export const getActiveDash = () => dashboards[get(activeDashIndex)];
+export let _activeDashIndex = writable(2); 
+export const setActiveDashIndex = i => _activeDashIndex.update(() => i);
+export const getActiveDash = () => dashboards[get(_activeDashIndex)];
 export const getWidget = ref => getActiveDash().widgets.get(ref);
 
 export const addDash = (title = '') => {
@@ -42,7 +42,7 @@ export const removeDash = index => {
     }
 }
 
-export const removeWidget = (widgetRef, dashRef = get(activeDashIndex)) => {
+export const removeWidget = (widgetRef, dashRef = get(_activeDashIndex)) => {
     try {
         if(dashboards[dashRef].widgets.delete(widgetRef))
         {

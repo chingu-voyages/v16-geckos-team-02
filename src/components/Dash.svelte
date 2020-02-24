@@ -1,16 +1,16 @@
 <script>
-  import { dashboards, activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
+  import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
   import { writable } from 'svelte/store';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
 
-  $: _widgetsCount = dashboards[$activeDashIndex]._widgetsCount;
-  let widgets = Array.from(dashboards[$activeDashIndex].widgets.keys());
+  $: _widgetsCount = dashboards[$_activeDashIndex]._widgetsCount;
+  let widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
   let items_arr = [];
   $: {
     if ($_widgetsCount !== widgets.length) {
-      widgets = Array.from(dashboards[$activeDashIndex].widgets.keys());
+      widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
       items_arr = generateGridItems(widgets, $cols);
     }
   } 
