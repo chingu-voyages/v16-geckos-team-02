@@ -1,5 +1,7 @@
 <script>
     import { getWidget, removeWidget} from '../../dataStore';
+ 
+  	import { quintOut } from 'svelte/easing';
     import Sticky from './Sticky.svelte';
     import Trash from '../buttons/Trash.svelte';
     export let ref;
@@ -8,9 +10,23 @@
     const removeSelf = () => {
       removeWidget(ref);
     }
+
+    function flip(node, { delay = 0, duration = 400, easing: easing$1 = easing.cubicOut }) {
+      const style = getComputedStyle(node);
+      const opacity = +style.opacity;
+      const width = parseFloat(style.width);
+      return {
+          delay,
+          duration,
+          easing: easing$1,
+          css: t => `overflow: hidden;` +
+              `opacity: ${Math.min(t * 20, 1) * opacity};` +
+              `transform: rotateY(${(t - 1) * 90}deg)`
+      };
+    }
 </script>
 
-<div>
+<div transition:flip="{{duration: 300, easing: quintOut }}">
   {#if editingTitle}
     <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
   {:else}

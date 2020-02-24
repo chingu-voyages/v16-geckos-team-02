@@ -73,8 +73,12 @@
   .grid-container {
     width: 100%;
     height: 100%;
+    min-height: calc(100vh - 180px);
     padding: 20px;
     padding-bottom: 15vh;
     box-sizing: border-box;
+  }
+  :global(.svlt-grid-resizer) {
+    opacity: 0;
   }
 </style>
