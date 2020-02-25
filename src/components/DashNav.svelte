@@ -10,15 +10,13 @@
     let trashIsOpen = false;
     const trash = new Toggler(state => trashIsOpen = state);
     let editingTitle = false;
-
     const makeNavIndexArray = (activeIndex) => {
         let arr = [];
-        for (let i=0;i<7;i++) {
+        for (let i = 0; i < 5; i++) {
             if (dashboards.length < 5) { // no loop
-                arr.push((activeIndex+i-3));
-            }
-            else {
-                const loopedIndex = (dashboards.length + activeIndex + i - 3) % dashboards.length;
+                arr.push((activeIndex + i - 2));
+            } else {
+                const loopedIndex = (dashboards.length + activeIndex + i - 2) % dashboards.length;
                 arr.push(loopedIndex);
             }
         }
@@ -82,20 +80,22 @@
             {/each}
             </div>
         {:else}
-        <div class="carousel {animationClass}">
-            {#each navIndexArray as dashIndex, i}
-                {#if dashIndex === $_activeDashIndex} 
-                    <div class="current">
-                        {#if editingTitle}
-                            <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />
-                        {:else}
-                            <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
-                        {/if}
-                    </div>
-                {:else}
-                    <button class="nav-button-{i}" on:click={() => setActiveDash(i > 3 ? 1 : -1)}>{dashboards[dashIndex] ? get(dashboards[dashIndex]._title) : ''}</button>
-                {/if}
-            {/each}
+        <div class="carousel-space">
+            <div class="carousel {animationClass}">
+                {#each navIndexArray as dashIndex, i}
+                    {#if dashIndex === $_activeDashIndex} 
+                        <div class="current">
+                            {#if editingTitle}
+                                <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />
+                            {:else}
+                                <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
+                            {/if}
+                        </div>
+                    {:else}
+                        <button class="nav-button-{i}" on:click={() => setActiveDash(i > 3 ? 1 : -1)}>{dashboards[dashIndex] ? get(dashboards[dashIndex]._title) : ''}</button>
+                    {/if}
+                {/each}
+            </div>
         </div>
         {/if}
     {:else}
@@ -159,13 +159,18 @@ nav {
     width: 20px;
     border: solid 1px #707070;
 }
-.carousel {
-    width: var(--carousel-size);
+
+.carousel-space {
+    width: 100%;
     height: 68px;
     position: relative;
-    left: calc(var(--carousel-size) / -6);
+}
+
+.carousel {
+    height: 68px;
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     place-items: center center;
 }
 button, input {
@@ -184,17 +189,14 @@ button, input {
     display: grid;
     place-items: center center;
 }
-.nav-button-2, .nav-button-4 {
+.nav-button-1, .nav-button-3 {
     font-size: 24px;
 }
-.nav-button-1, .nav-button-5 {
+.nav-button-0, .nav-button-4 {
     font-size: 16px;
 }
-.nav-button-0, .nav-button-6 {
-    font-size: 12px;
-}
 
-.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-2, .backward-animation .nav-button-4, .forward-animation .nav-button-5, .backward-animation .nav-button-1 {
+.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-1, .backward-animation .nav-button-3, .forward-animation .nav-button-4, .backward-animation .nav-button-0 {
     animation: shrink var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes shrink {
@@ -202,7 +204,7 @@ button, input {
     to { transform: scale(0.75) }
 }
 
-.forward-animation .nav-button-4, .backward-animation .nav-button-2, .forward-animation .nav-button-1, .backward-animation .nav-button-5 {
+.forward-animation .nav-button-3, .backward-animation .nav-button-1, .forward-animation .nav-button-0, .backward-animation .nav-button-4 {
     animation: grow var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes grow {
