@@ -196,7 +196,7 @@ button, input {
     font-size: 16px;
 }
 
-.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-1, .backward-animation .nav-button-3, .forward-animation .nav-button-4, .backward-animation .nav-button-0 {
+.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-0, .forward-animation .nav-button-1, .backward-animation .nav-button-3, .backward-animation .nav-button-4 {
     animation: shrink var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes shrink {
@@ -204,7 +204,7 @@ button, input {
     to { transform: scale(0.75) }
 }
 
-.forward-animation .nav-button-3, .backward-animation .nav-button-1, .forward-animation .nav-button-0, .backward-animation .nav-button-4 {
+.forward-animation .nav-button-3, .forward-animation .nav-button-4, .backward-animation .nav-button-1, .backward-animation .nav-button-0 {
     animation: grow var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes grow {
@@ -217,14 +217,14 @@ button, input {
 }
 @keyframes forward {
     from { transform: translateX(0%) }
-    to { transform: translateX(-14.2%) }
+    to { transform: translateX(-20%) }
 }
 .backward-animation {
     animation: backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes backward {
     from { transform: translateX(0%) }
-    to { transform: translateX(14.2%) }
+    to { transform: translateX(20%) }
 }
 
 @media only screen and (max-width: 768px) {
