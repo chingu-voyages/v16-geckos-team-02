@@ -5,9 +5,16 @@
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
 
+  export let clearWidgets = false;
+
   $: _widgetsCount = dashboards[$_activeDashIndex] ? dashboards[$_activeDashIndex]._widgetsCount : writable(0); // fallback for no dashboards
   let widgets = [];
   let items_arr = [];
+  $: {
+    if (clearWidgets) {
+      items_arr = [];
+    }
+  }
   $: {
     if ($_widgetsCount !== widgets.length) {
       widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());

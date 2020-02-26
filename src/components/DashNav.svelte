@@ -1,5 +1,6 @@
 <script>
     import {_activeDashIndex, dashboards, removeDash, addDash, setActiveDashIndex} from '../dataStore';
+    import { createEventDispatcher } from 'svelte';
     import { get, writable } from 'svelte/store';
     import Left from './buttons/Left.svelte';
     import Right from './buttons/Right.svelte';
@@ -7,6 +8,7 @@
     import Add from './buttons/Add.svelte';
     import Toggler from '../utils/toggler.js';
     
+    const dispatch = createEventDispatcher();
     let trashIsOpen = false;
     const trash = new Toggler(state => trashIsOpen = state);
     let editingTitle = false;
@@ -31,6 +33,7 @@
     const setActiveDash = shift => {
         const nextDashIndex = (dashboards.length + $_activeDashIndex + shift) % dashboards.length;
         if (shift !== 0 && nextDashIndex !== $_activeDashIndex) {
+            dispatch('changingDash');
             if (shift > 0) {
                 animationClass = 'forward-animation';
             }
