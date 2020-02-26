@@ -1,5 +1,6 @@
 
 <script>
+	import toMarkdown from '../../../utils/toMarkdown.js';
 	export let _data;
 	let editing = true;
 	const disableEditIfNoFocus = () => { if (this !== document.activeElement) editing = false };
@@ -8,7 +9,7 @@
 {#if editing}
 	<textarea on:change={disableEditIfNoFocus} bind:value={$_data} on:blur={() => editing = false} autofocus />
 {:else}
-	<article on:click={() => editing = true}>{$_data}</article>
+	<article on:click={() => editing = true}>{@html toMarkdown($_data)}</article>
 {/if}
 
 <style>
