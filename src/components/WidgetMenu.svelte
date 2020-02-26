@@ -31,11 +31,21 @@
 </div>
   
 <style>
+   .menuArea {
+    position: fixed;
+    display: flex;
+    flex-flow: row-reverse nowrap;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    min-height: 15vh;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.5);
+  }
   nav {
     width: 280px;
-    position: fixed;
-    bottom: 5vh;
-    right: 5vw;
+    margin-right: 5vh;
+    margin-bottom: 5vh;
     display: inline-grid;
     grid-template-columns: 1fr 5fr 1fr;
     grid-template-rows: auto auto 70px;
@@ -52,7 +62,7 @@
       right: calc(15vw - 78px - 39px);
     }
   }
-  div {
+  .menu {
     grid-area: menu;
     border: solid 1px #707070;
   }
@@ -67,6 +77,8 @@
     align-items: center;
     background: none;
     border: none;
+    padding: 8px;
+    margin: 0;
   }
   h3 {
     width: 100%;

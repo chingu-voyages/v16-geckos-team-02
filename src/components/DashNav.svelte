@@ -188,13 +188,13 @@ button, input {
     font-size: 24px;
 }
 .nav-button-1, .nav-button-5 {
-    font-size: 16px;
+    font-size: 18px;
 }
 .nav-button-0, .nav-button-6 {
-    font-size: 12px;
+    font-size: 14px;
 }
 
-.forward-animation .current, .backward-animation .current, .forward-animation .nav-button-0, .forward-animation .nav-button-1, .backward-animation .nav-button-3, .backward-animation .nav-button-4 {
+.forward-animation .current, .forward-animation .nav-button-2, .forward-animation .nav-button-1, .backward-animation .current, .backward-animation .nav-button-4, .backward-animation .nav-button-5 {
     animation: shrink var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes shrink {
@@ -202,12 +202,12 @@ button, input {
     to { transform: scale(0.75) }
 }
 
-.forward-animation .nav-button-3, .forward-animation .nav-button-4, .backward-animation .nav-button-1, .backward-animation .nav-button-0 {
+.forward-animation .nav-button-4, .forward-animation .nav-button-5, .forward-animation .nav-button-6, .backward-animation .nav-button-2, .backward-animation .nav-button-1, .backward-animation .nav-button-0 {
     animation: grow var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes grow {
     from { transform: scale(1) }
-    to { transform: scale(1.25) }
+    to { transform: scale(1.32) }
 }
 
 .forward-animation {
@@ -215,14 +215,14 @@ button, input {
 }
 @keyframes forward {
     from { transform: translateX(0%) }
-    to { transform: translateX(-20%) }
+    to { transform: translateX(-14.2%) }
 }
 .backward-animation {
     animation: backward var(--animation-speed) var(--animation-curve) 0s 1 forwards;
 }
 @keyframes backward {
     from { transform: translateX(0%) }
-    to { transform: translateX(20%) }
+    to { transform: translateX(14.2%) }
 }
 
 @media only screen and (max-width: 768px) {
@@ -238,10 +238,11 @@ button, input {
     }
   
 }
-@media only screen and (max-width: 420px) { 
+@media only screen and (max-width: 620px) { 
     .carousel {
-        width: 200%;
-        left: -50%;
+        width: 300%;
+        left: -100%;
     }
+
 }
 </style>

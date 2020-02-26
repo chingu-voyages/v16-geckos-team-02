@@ -17,6 +17,5 @@
 <style>
 	main {
 		width: 100%;
-		overflow-x: hidden;
 	}
 </style>
