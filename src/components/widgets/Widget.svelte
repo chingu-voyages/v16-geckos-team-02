@@ -28,7 +28,7 @@
 
 <div transition:flip="{{duration: 300, easing: quintOut }}">
   {#if editingTitle}
-    <input bind:value={$_title} on:blur={() => editingTitle = false} on:keypress={handleEnter} type="text" autofocus />
+    <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" />
   {:else}
     <h2 on:click={() => editingTitle = true}>{$_title}</h2>
   {/if}
