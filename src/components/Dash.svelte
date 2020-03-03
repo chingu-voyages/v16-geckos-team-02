@@ -1,6 +1,7 @@
 <script>
   import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
   import { writable } from 'svelte/store';
+  import { onMount } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
@@ -31,13 +32,30 @@
     const nColsFitInWindow = Math.round(gridWidth/approxColumnSizePx);
     return nColsFitInWindow - (nColsFitInWindow%2);
   }
+  let prevItemsHashTable = {};
+  onMount(() => {
+    // hash table of initial widgets to compare sizeAndPos changes
+    items_arr.forEach(item => prevItemsHashTable[item.id] = item); 
+  })
+  const getHighestColumnInUse = arr => Math.max(...arr.map(item => item.x + item.w));
+  const sameSizeAndPos = ({x, y, w, h}, {x: x2, y: y2, w: w2, h: h2}) => x === x2 && y === y2 && w === w2 && h === h2;
   const storeWidgetSizeAndPos = item => {
-    const {w, h, x, y} = item;
-    setWidgetSizeAndPos(item.id, {w, h, x, y});
+    // filter items_arr for items with changed size or position or if new item use whole items_arr
+    const changedItems = !prevItemsHashTable.hasOwnProperty(item.id) ? items_arr : items_arr.filter(item => !sameSizeAndPos(item, prevItemsHashTable[item.id]));
+    if (changedItems.length > 0) {
+      // find N of max used column - x + w
+      const highestColumnInUse = getHighestColumnInUse(items_arr);
+      // update sizeAndPos[highestColumnInUse] for each changedItems
+      changedItems.forEach(item => {
+        const {w, h, x, y} = item;
+        setWidgetSizeAndPos(highestColumnInUse, item.id, {w, h, x, y})
+      });
+      items_arr.forEach(item => prevItemsHashTable[item.id] = item);
+    }
   }
   const centerGridItems = arr => {
     // find highest x position 
-    const highestXPos = Math.max(...arr.map(item => item.x + item.w));
+    const highestXPos = getHighestColumnInUse(arr);
     // diff between cols and highestXPos divided by two
     const halfDiff = Math.floor((($cols) - highestXPos) / 2);
     // shift all x positions up by halfDiff
@@ -47,8 +65,11 @@
   };
   const generateGridItems = (widgets, cols) => {
     let arr = [];
+    // method to find which sizeAndPos store to use
+    const getClosestStoredColMatch = sizeAndPos => Object.keys(sizeAndPos).sort((a,b) => Math.abs(cols - a) - Math.abs(cols - b))[0];
     widgets.forEach((ref, i) => {
-      let {w, h, x, y} = getWidget(ref).sizeAndPos;
+      const widget = getWidget(ref);
+      let {w, h, x, y} = widget.sizeAndPos[getClosestStoredColMatch(widget.sizeAndPos)];
       if (w > cols) { // width of item is larger then grid:
         w = cols; // prevent items overflowing x
         fillEmpty = true; // fill empty spaces
@@ -57,7 +78,7 @@
         fillEmpty = false;
       }
       let newItem = gridHelp.item({w, h, x, y, id: ref});
-      if (x+w >= cols || findSpaceForAll) {
+      if (x+w > cols || findSpaceForAll) {
         newItem = {...newItem, ...gridHelp.findSpaceForItem(newItem, arr, cols)};
       }
       arr = gridHelp.appendItem(newItem, arr, cols);
@@ -71,7 +92,7 @@
 </script>
 
 <div id="gridContainer" class="grid-container">
-  <Grid {fillEmpty} items={items_arr} bind:items={items_arr} cols={$cols} let:item rowHeight={50} gap={20} on:adjust={event => storeWidgetSizeAndPos(event.detail.focuesdItem)} on:resize={handleWindowResize} on:mount={handleWindowResize}>
+  <Grid {fillEmpty} items={items_arr} bind:items={items_arr} cols={$cols} let:item rowHeight={50} gap={20} on:adjust={storeWidgetSizeAndPos} on:resize={handleWindowResize} on:mount={handleWindowResize}>
       <Widget ref={item.id} />
   </Grid>
 </div>

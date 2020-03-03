@@ -19,7 +19,7 @@ export const addDash = (title = '') => {
         // TODO decide how to handle the exception
     }
 }
-export const addWidget = (type, title = '', data = '', sizeAndPos = {w: 8, h: 5, x: Infinity, y: 0}) => {
+export const addWidget = (type, title = '', data = '', sizeAndPos = { [0]: {w: 8, h: 5, x: Infinity, y: 0}}) => {
     try {
         const widgetData = {
             type,
@@ -53,9 +53,9 @@ export const removeWidget = (widgetRef, dashRef = get(_activeDashIndex)) => {
     }
 }
 
-export const setWidgetSizeAndPos = (ref, data) => {
+export const setWidgetSizeAndPos = (highestCol, ref, data) => {
     try {
-        getActiveDash().widgets.get(ref).sizeAndPos = data;
+        getActiveDash().widgets.get(ref).sizeAndPos[highestCol] = data;
     } catch (e) {
         // TODO decide how to handle the exception
     }
@@ -70,29 +70,29 @@ addWidget(
     'Sticky', 
     'Welcome', 
     'This is currently only a prototype. The concept is a personal dash space for organising activities. At the moment functionality is limited.',
-    {w: 8, h: 5, x: 0, y: 0 }
+    {24: {w: 8, h: 5, x: 0, y: 0}}
 );
 addWidget(
     'Sticky',  
     'Widgets', 
     'These are the building block. Each has an editiable title. You can resize and drag and drop them.',
-    {w: 8, h: 6, x: 8, y: 4 }
+    {24: {w: 8, h: 6, x: 8, y: 4}}
 );
 addWidget(
     'Sticky', 
     'Sticky', 
     'A type of Widget. Currently the only type available for the prototype. It accepts a text input. Future versions will accept and automatically convert image urls, dates, links, and todo lists.',
-    {w: 8, h: 5, x: 0, y: 6 }
+    {24: {w: 8, h: 5, x: 0, y: 6}}
 );
 addWidget(
     'Sticky', 
     'Add Widget', 
     'You may add more widgets using the widgets menu in the bottom right corner.',
-    {w: 8, h: 5, x: 0, y: 8 }
+    {24: {w: 8, h: 5, x: 0, y: 8}}
 );
 addWidget(
     'Sticky', 
     'Delete Widgets', 
     'You can remove widgets by activating the trash from the widgets menu and clicking the trash icon within each widget to be removed.',
-    {w: 8, h: 5, x: 16, y: 8 }
+    {24: {w: 8, h: 5, x: 16, y: 8}}
 );
