@@ -7,6 +7,7 @@
     import Trash from './buttons/Trash.svelte';
     import Add from './buttons/Add.svelte';
     import Toggler from '../utils/toggler.js';
+    import handleEnter from '../utils/handleEnter';
     
     const dispatch = createEventDispatcher();
     let trashIsOpen = false;
@@ -90,7 +91,7 @@
                 {#if dashIndex === $_activeDashIndex} 
                     <div class="current">
                         {#if editingTitle}
-                            <input bind:value={$_title} on:blur={closeEditingTitle} type="text" autofocus />
+                            <input bind:value={$_title} on:blur={closeEditingTitle} on:keypress={handleEnter} type="text" autofocus />
                         {:else}
                             <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
                         {/if}

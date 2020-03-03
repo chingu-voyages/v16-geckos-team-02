@@ -1,9 +1,9 @@
 <script>
     import { getWidget, removeWidget} from '../../dataStore';
- 
   	import { quintOut } from 'svelte/easing';
     import Sticky from './Sticky.svelte';
     import Trash from '../buttons/Trash.svelte';
+    import handleEnter from '../../utils/handleEnter';
     export let ref;
     let {_title, _data, type} = getWidget(ref);
     let editingTitle = false;
@@ -28,7 +28,7 @@
 
 <div transition:flip="{{duration: 300, easing: quintOut }}">
   {#if editingTitle}
-    <input bind:value={$_title} on:blur={() => editingTitle = false} type="text" autofocus />
+    <input bind:value={$_title} on:blur={() => editingTitle = false} on:keypress={handleEnter} type="text" autofocus />
   {:else}
     <h2 on:click={() => editingTitle = true}>{$_title}</h2>
   {/if}
