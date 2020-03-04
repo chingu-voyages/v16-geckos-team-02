@@ -1,78 +1,39 @@
 <script>
   import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
-  import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
   import gridHelp from "svelte-grid/build/helper/index.mjs";
 
   export let clearWidgets = false;
-
+  const findSpaceForAll = false;
+  const approxColumnSizePx = 50;
+ 
   $: _widgetsCount = dashboards[$_activeDashIndex] ? dashboards[$_activeDashIndex]._widgetsCount : writable(0); // fallback for no dashboards
   let widgets = [];
-  let items_arr = [];
-  $: {
-    if (clearWidgets) {
-      items_arr = [];
-    }
-  }
+  let itemsArr = [];
+  $: cols = 0;
   $: {
     if ($_widgetsCount !== widgets.length) {
       widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
-      items_arr = generateGridItems(widgets, $cols);
+      itemsArr = generateGridItems(widgets, cols);
     }
   } 
-  const cols = writable(40);
-  let fillEmpty = false;
-  const findSpaceForAll = false;
-  const approxColumnSizePx = 50;
-
-  const getNOfCols = () => {
-    const gridWidth = document.getElementById('gridContainer').clientWidth;
-    const nColsFitInWindow = Math.round(gridWidth/approxColumnSizePx);
-    return nColsFitInWindow - (nColsFitInWindow%2);
-  }
-  let prevItemsHashTable = {};
-  onMount(() => {
-    // hash table of initial widgets to compare sizeAndPos changes
-    items_arr.forEach(item => prevItemsHashTable[item.id] = item); 
-  })
-  const getHighestColumnInUse = arr => Math.max(...arr.map(item => item.x + item.w));
-  const sameSizeAndPos = ({x, y, w, h}, {x: x2, y: y2, w: w2, h: h2}) => x === x2 && y === y2 && w === w2 && h === h2;
-  const storeWidgetSizeAndPos = item => {
-    // filter items_arr for items with changed size or position or if new item use whole items_arr
-    const changedItems = !prevItemsHashTable.hasOwnProperty(item.id) ? items_arr : items_arr.filter(item => !sameSizeAndPos(item, prevItemsHashTable[item.id]));
-    if (changedItems.length > 0) {
-      // find N of max used column - x + w
-      const highestColumnInUse = getHighestColumnInUse(items_arr);
-      // update sizeAndPos[highestColumnInUse] for each changedItems
-      changedItems.forEach(item => {
-        const {w, h, x, y} = item;
-        setWidgetSizeAndPos(highestColumnInUse, item.id, {w, h, x, y})
-      });
-      items_arr.forEach(item => prevItemsHashTable[item.id] = item);
+  $: {
+    if (clearWidgets) {
+      itemsArr = [];
     }
   }
-  const centerGridItems = arr => {
-    // find highest x position 
-    const highestXPos = getHighestColumnInUse(arr);
-    // diff between cols and highestXPos divided by two
-    const halfDiff = Math.floor((($cols) - highestXPos) / 2);
-    // shift all x positions up by halfDiff
-    return arr.map(item => { 
-      return  {...item, ...{x: item.x + halfDiff}}
-    });
-  };
+
+  let fillEmpty = false;
   const generateGridItems = (widgets, cols) => {
     let arr = [];
-    // method to find which sizeAndPos store to use
-    const getClosestStoredColMatch = sizeAndPos => Object.keys(sizeAndPos).sort((a,b) => Math.abs(cols - a) - Math.abs(cols - b))[0];
     widgets.forEach((ref, i) => {
       const widget = getWidget(ref);
       let {w, h, x, y} = widget.sizeAndPos[getClosestStoredColMatch(widget.sizeAndPos)];
-      if (w > cols) { // width of item is larger then grid:
-        w = cols; // prevent items overflowing x
-        fillEmpty = true; // fill empty spaces
+      if (w > cols) {
+        w = cols;
+        fillEmpty = true;
       }
       else {
         fillEmpty = false;
@@ -85,14 +46,60 @@
     });
     return centerGridItems(arr);
   };
+
   const handleWindowResize = () => {
-    cols.update(getNOfCols);
-    items_arr = generateGridItems(widgets, $cols);
+    cols = getNOfCols();
+    itemsArr = generateGridItems(widgets, cols);
+  }
+
+  let prevItemsLookup = {};
+  const handleAdjust = function storeWidgetSizeAndPos() {
+    const changedItems = itemsArr.filter(item => !prevItemsLookup[item.id] || !isSameSizeAndPos(item, prevItemsLookup[item.id]));
+    if (changedItems.length > 0) {
+      const highestColumnInUse = getHighestColumnInUse(itemsArr);
+      changedItems.forEach(item => {
+        const {w, h, x, y} = item;
+        setWidgetSizeAndPos(highestColumnInUse, item.id, {w, h, x, y})
+      });
+      itemsArr.forEach(item => prevItemsLookup[item.id] = item);
+    }
+  }
+
+  const centerGridItems = arr => {
+    const highestXPos = getHighestColumnInUse(arr);
+    const halfDiff = Math.floor(((cols) - highestXPos) / 2);
+    return arr.map(item => { 
+      return  {...item, ...{x: item.x + halfDiff}}
+    });
   };
+  
+  onMount(() => {
+    itemsArr.forEach(item => prevItemsLookup[item.id] = item); 
+  })
+
+  function getClosestStoredColMatch(sizeAndPos) {
+    const accendingDiffArr = Object.keys(sizeAndPos).sort((a,b) => {
+      const diffOfFirstVal = Math.abs(cols - a);
+      const diffOfSecondVal = Math.abs(cols - b);
+      return diffOfFirstVal - diffOfSecondVal
+    });
+    return accendingDiffArr[0]
+  } 
+  function isSameSizeAndPos ({x, y, w, h}, {x: x2, y: y2, w: w2, h: h2}) {
+    return x === x2 && y === y2 && w === w2 && h === h2
+  }
+  function getHighestColumnInUse(arr) {
+    return Math.max(...arr.map(item => item.x + item.w))
+  }
+  function getNOfCols() {
+    const gridWidth = document.getElementById('gridContainer').clientWidth;
+    const nColsFitInWindow = Math.round(gridWidth/approxColumnSizePx);
+    return nColsFitInWindow - (nColsFitInWindow%2);
+  }
 </script>
 
 <div id="gridContainer" class="grid-container">
-  <Grid {fillEmpty} items={items_arr} bind:items={items_arr} cols={$cols} let:item rowHeight={50} gap={20} on:adjust={storeWidgetSizeAndPos} on:resize={handleWindowResize} on:mount={handleWindowResize}>
+  <Grid {fillEmpty} items={itemsArr} bind:items={itemsArr} cols={cols} let:item rowHeight={50} gap={20} on:adjust={handleAdjust} on:resize={handleWindowResize} on:mount={handleWindowResize}>
       <Widget ref={item.id} />
   </Grid>
 </div>
