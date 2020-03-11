@@ -1,5 +1,6 @@
 <script>
-  import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos } from "../dataStore";
+  import { dashboards, _activeDashIndex, getWidget, setWidgetSizeAndPos, removeWidgetSizeAndPos } from "../dataStore";
+  import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
   import Widget from "./widgets/Widget.svelte";
   import Grid from "svelte-grid";
@@ -12,9 +13,11 @@
   $: _widgetsCount = dashboards[$_activeDashIndex] ? dashboards[$_activeDashIndex]._widgetsCount : writable(0); // fallback for no dashboards
   let widgets = [];
   let itemsArr = [];
+  let prevDashIndex = $_activeDashIndex;
   $: cols = 0;
   $: {
-    if ($_widgetsCount !== widgets.length) {
+    if ($_widgetsCount !== widgets.length || $_activeDashIndex !== prevDashIndex) {
+      prevDashIndex = $_activeDashIndex;
       widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
       itemsArr = generateGridItems(widgets, cols);
     }
@@ -60,6 +63,10 @@
       changedItems.forEach(item => {
         const {w, h, x, y} = item;
         setWidgetSizeAndPos(highestColumnInUse, item.id, {w, h, x, y})
+        const currentClosestMatch = getClosestStoredColMatch(getWidget(item.id).sizeAndPos);
+        if (currentClosestMatch > highestColumnInUse) {
+          removeWidgetSizeAndPos(item.id, currentClosestMatch);
+        }
       });
       itemsArr.forEach(item => prevItemsLookup[item.id] = item);
     }
