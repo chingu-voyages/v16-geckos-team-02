@@ -1,5 +1,6 @@
 <script>
   import { addWidget } from '../dataStore.js';
+  import { onMount } from 'svelte';
   import Add from './buttons/Add.svelte';
   import Trash from './buttons/Trash.svelte';
   import Toggler from '../utils/toggler.js';
@@ -11,9 +12,27 @@
   const add = type => {
     addWidget(type);
   };
+
+  let isAtBottom = false;
+
+  onMount(() => {
+    let observer = new IntersectionObserver(entries => {
+      console.log(entries[0])
+      if (entries[0].isIntersecting) {
+        document.body.classList.add("header-not-at-top");
+        isAtBottom = true;
+      } else {
+        document.body.classList.remove("header-not-at-top");
+        isAtBottom = false;
+      }
+    }, );
+    let footer = document.querySelector('#footer');
+    observer.observe(footer); 
+    return () => observer.unobserve(footer); 
+  });
 </script>
   
-  <nav>
+  <nav class="{isAtBottom ? 'bottom' : ''}">
     <Trash active={trashActive} on:trash={toggleTrash} on:trash /> <!-- the 2nd on:trash is to pass the event out to App -->
       {#if menuIsOpen}
         <img class="cancel" src="/images/cancelIcon.svg" alt="x" />
@@ -48,6 +67,9 @@
     nav {
       right: calc(15vw - 78px - 39px);
     }
+  }
+  nav.bottom {
+    position: absolute;
   }
   .menu {
     grid-area: menu;
