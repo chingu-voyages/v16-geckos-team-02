@@ -12,13 +12,6 @@ body {
 	color: #ffffff;
 }
 
-@media only screen and (min-width: 780px) {
-	body {
-	  padding-left: calc(15vw - 78px - 39px);
-	  padding-right: calc(15vw - 78px - 39px);
-	}
-}
-
 a {
 	color: rgb(0,100,200);
 	text-decoration: none;

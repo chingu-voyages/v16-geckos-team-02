@@ -115,9 +115,9 @@
   .grid-container {
     width: 100%;
     height: 100%;
-    min-height: calc(100vh - 180px);
+    min-height: calc(100vh - 180px - 220px);
     padding: 20px;
-    padding-bottom: 15vh;
+    padding-bottom: 180px;
     box-sizing: border-box;
   }
   :global(.svlt-grid-resizer) {
