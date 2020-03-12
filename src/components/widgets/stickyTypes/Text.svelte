@@ -1,19 +1,20 @@
 
 <script>
 	import toMarkdown from '../../../utils/toMarkdown.js';
+	import { createEventDispatcher } from 'svelte';
 	export let _data;
-	let editing = true;
+	const dispatch = createEventDispatcher();
+    const click = () => {
+        dispatch('click');
+    } 
+	let editing = $_data === '';
 	const disableEditIfNoFocus = () => { if (this !== document.activeElement) editing = false };
 </script>
 
-{#if editing}
-	<textarea on:change={disableEditIfNoFocus} bind:value={$_data} on:blur={() => editing = false} autofocus />
-{:else}
-	<article on:click={() => editing = true}>{@html toMarkdown($_data)}</article>
-{/if}
+<article on:click={click}>{@html toMarkdown($_data)}</article>
 
 <style>
-	textarea, article {
+	article {
 		width: 90%;
 		height: 100%;
 		background: none;
