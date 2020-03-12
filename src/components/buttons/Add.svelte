@@ -13,14 +13,14 @@
 <style>
 	button {
         grid-area: add;
-        min-width: 100%;
-        min-height: 100%;
-        width: 68px;
-        height: 68px;
-
-        border: solid 1px #707070;
+        width: 70px;
+        height: 70px;
+        border: solid 5px #ACACAC;
+        border-radius: 12px;
         margin: 0;
         background: none;
+        background: #ffffff;
+        z-index: 300;
     }
     .active {
         background: #707070;

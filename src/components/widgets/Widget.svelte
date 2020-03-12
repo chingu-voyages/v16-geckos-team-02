@@ -38,10 +38,12 @@
       <div>{type} Widget type not yet implemented</div>
   {/if}
   <span><Trash on:trash={removeSelf} /></span>
+  <img class="resize-icon" src="/images/resizeIcon.svg" alt="-" />
 </div>
 
 <style>
   div {
+    position: relative;
     display: grid;
     place-items: start center;
     width: 100%;
@@ -49,7 +51,9 @@
     overflow: hidden;
     padding: 12px;
     box-sizing: border-box;
-    border: 1px solid #707070;
+    border: 1px solid #ACACAC;
+    box-shadow: #ACACAC 0 3px 6px;
+    color: #707070;
   }
   h2, input {
     text-decoration: none;
@@ -63,6 +67,7 @@
     min-height: 30px;
     background: none;
     font-weight: 400;
+    font-family: 'Courgette', cursive;
   }
   span {
     position: absolute;
@@ -72,6 +77,11 @@
   }
   :global(.trash) span {
     visibility: visible;
+  }
+  .resize-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
   
 </style>

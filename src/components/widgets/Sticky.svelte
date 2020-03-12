@@ -19,5 +19,7 @@
 <style>
     textarea {
       width: 90%;
+      font-family: 'Patrick Hand', cursive;
+      color: #707070;
     }
 </style>

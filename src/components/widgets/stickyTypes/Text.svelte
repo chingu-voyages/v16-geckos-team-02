@@ -20,5 +20,7 @@
 		padding: 0;
 		margin: 0;
 		white-space: pre-wrap;
+		font-family: 'Patrick Hand', cursive;
+		color: #707070;
 	}
 </style>

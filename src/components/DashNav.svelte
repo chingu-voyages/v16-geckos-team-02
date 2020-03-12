@@ -74,18 +74,8 @@
 <nav>
     <Left on:left={() => setActiveDash(-1)} />
     <Trash active={trashIsOpen} on:trash={trash.toggle} cancelPos="right" />
-    <div class="container">
+    <div class="container {trashIsOpen ? 'trash' : ''}">
     {#if dashboards.length > 0}
-        {#if trashIsOpen}
-            <div class="trashMenu">
-            {#each dashboards as dash, i}
-                <button on:click={() => deleteDash(i)}>
-                    <h3>{get(dash._title)}</h3> 
-                    <img src="/images/trashIcon.svg" alt="-" />
-                </button>
-            {/each}
-            </div>
-        {:else}
         <div class="carousel {animationClass}">
             {#each navIndexArray as dashIndex, i}
                 {#if dashIndex === $_activeDashIndex} 
@@ -93,15 +83,19 @@
                         {#if editingTitle}
                             <input bind:value={$_title} on:blur={closeEditingTitle} on:keypress={handleEnter} type="text" autofocus />
                         {:else}
-                            <button class="active-dash-title" on:click={() => editingTitle = true}>{$_title}</button>
+                            <div class="active-dash-title"><button on:click={() => editingTitle = true}>{$_title}</button><span><Trash className="small" on:trash={() => deleteDash(dashIndex)} /></span></div>
                         {/if}
                     </div>
                 {:else}
-                    <button class="nav-button-{i}" on:click={() => setActiveDash(i > 3 ? 1 : -1)}>{dashboards[dashIndex] ? get(dashboards[dashIndex]._title) : ''}</button>
+                    <div class="nav-button-{i}">
+                    {#if dashboards[dashIndex]} 
+                        <button on:click={() => setActiveDash(i > 3 ? 1 : -1)}>{get(dashboards[dashIndex]._title)}</button>
+                        <span><Trash className="small" on:trash={() => deleteDash(dashIndex)} /></span>
+                    {/if}
+                    </div>
                 {/if}
             {/each}
         </div>
-        {/if}
     {:else}
         <div class="carousel"></div>
     {/if}
@@ -120,20 +114,23 @@ nav {
     width: 100%;
     display: grid;
     grid-template-columns: auto 70px auto 70px auto 70px auto 70px auto;
-    grid-template-areas: ". left . trash bar add . right .";
+    grid-template-areas: "left . . trash bar add . . right";
     grid-template-rows: 70px;
     place-items: start center;
     margin-bottom: 70px;
+    margin-top: 24px;
 }
 .container {
     position: relative;
     grid-area: bar;
     overflow-x: hidden;
     overflow-y: visible;
-    width: 100%;
+    width: calc(100% + 18px);
     min-width: 50vw;
+    min-height: 100%;
     box-sizing: border-box;
-    border: solid 1px #707070;
+    background: #ACACAC;
+    z-index: 200;
 }
 .trashMenu {
     position: relative;
@@ -144,11 +141,8 @@ nav {
     top: 0;
     left: 0;
     width: 100%;
-    border: solid 1px #707070;
     box-sizing: border-box;
     padding: 24px;
-    background: #ffffff;
-    z-index: 200;
 }
 .trashMenu button {
     width: 200px;
@@ -163,6 +157,14 @@ nav {
     width: 20px;
     border: solid 1px #707070;
 }
+span {
+    visibility: hidden;
+    width: 50px;
+    height: 50px;
+  }
+  :global(.container.trash) span {
+    visibility: visible;
+  }
 .carousel {
     width: var(--carousel-size);
     height: 68px;
@@ -175,26 +177,37 @@ nav {
 button, input {
     background: none;
     border: none;
-    color: #707070;
     padding: 0;
     margin: 0;
     text-align: center;
     white-space: nowrap;
     height: 50px;
+    color: #ffffff;
 }
 .current {
+    height: 68px;
     min-width: 150px;
     font-size: 32px;
     display: grid;
     place-items: center center;
 }
+.active-dash-title {
+    display: inline-flex;
+    align-items: center;
+}
 .nav-button-2, .nav-button-4 {
+    display: inline-flex;
+    align-items: center;
     font-size: 24px;
 }
 .nav-button-1, .nav-button-5 {
+    display: inline-flex;
+    align-items: center;
     font-size: 18px;
 }
 .nav-button-0, .nav-button-6 {
+    display: inline-flex;
+    align-items: center;
     font-size: 14px;
 }
 

@@ -13,7 +13,6 @@
   };
 </script>
   
-<div class="menuArea">
   <nav>
     <Trash active={trashActive} on:trash={toggleTrash} on:trash /> <!-- the 2nd on:trash is to pass the event out to App -->
       {#if menuIsOpen}
@@ -28,34 +27,22 @@
     <h2>Widgets</h2>
     <Add active={menuIsOpen} on:add={menu.toggle} />
   </nav>
-</div>
   
 <style>
-   .menuArea {
-    position: fixed;
-    display: flex;
-    flex-flow: row-reverse nowrap;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    min-height: 15vh;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.5);
-  }
   nav {
-    width: 280px;
-    margin-right: 5vh;
-    margin-bottom: 5vh;
+    position: fixed;
+    bottom: 5vh;
+    right: 5vh;
+    z-index: 100;
+    max-width: 300px;
     display: inline-grid;
     grid-template-columns: 1fr 5fr 1fr;
     grid-template-rows: auto auto 70px;
     grid-template-areas: 
       ". . cancel"
-      "menu menu menu"
+      ". menu menu"
       "trash title add";
     align-items: center;
-    background: rgba(255,255,255,0.5);
-    position: relative;
   }
   @media only screen and (min-width: 780px) {
     nav {
@@ -64,7 +51,8 @@
   }
   .menu {
     grid-area: menu;
-    border: solid 1px #707070;
+    border-radius: 12px;
+    background: #ACACAC;
   }
   .cancel {
     grid-area: cancel;
@@ -78,6 +66,7 @@
     background: none;
     border: none;
     padding: 8px;
+    padding-right: 9px;
     margin: 0;
   }
   h3 {
@@ -85,16 +74,21 @@
     font-size: 32px;
     font-weight: 300;
     margin: 0;
+    font-family: 'Play', sans-serif;
+    color: #ffffff;
+    text-align: left;
+    margin-left: 14px;
   }
   h2 {
     grid-area: title;
     display: inline-grid;
     place-items: center center;
-    height: 96%;
-    border: solid 1px #707070;
-    border-width: 1px 0 1px 0;
+    height: 100%;
+    background: #ACACAC;
     font-size: 32px;
     font-weight: 300;
     margin: 0;
+    width:120%;
+    margin-left: -10%;
   }
 </style>
