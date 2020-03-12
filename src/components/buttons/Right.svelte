@@ -1,8 +1,12 @@
 <script>
-
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+    const right = () => {
+        dispatch('right');
+    } 
 </script>
 
-<button>
+<button on:click={right}>
     <img src="/images/arrowRightIcon.svg" alt="next" />
 </button>
 

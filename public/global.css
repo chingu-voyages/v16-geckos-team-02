@@ -5,11 +5,11 @@ html, body {
 }
 
 body {
-	color: #333;
 	margin: 0;
-	padding: 8px;
+	padding: 0;
 	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: 'Play', sans-serif;
+	color: #ffffff;
 }
 
 a {
@@ -48,7 +48,6 @@ input[type="range"] {
 }
 
 button {
-	color: #333;
 	background-color: #f4f4f4;
 	outline: none;
 }
