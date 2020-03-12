@@ -1,30 +1,37 @@
 <script>
-	export let name;
+	import DashNav from './components/DashNav.svelte';
+	import Dash from './components/Dash.svelte';
+	import WidgetMenu from './components/WidgetMenu.svelte';
+	import Footer from './components/Footer.svelte';
+	let trashActive = false;
+	let clearWidgets = false;
+	const clearDash = event => {
+		clearWidgets = true;
+		setTimeout(() => clearWidgets = false, 0)
+	}
+	const activateTrash = event => {
+		trashActive = event.detail.active;
+	}
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+<main class="{trashActive ? 'trash' : ''}">
+	<DashNav on:changingDash={clearDash} />
+	<Dash {clearWidgets} />
+    <WidgetMenu on:trash={activateTrash} />
 </main>
+<Footer />
 
 <style>
 	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
+		width: 100%;
+		box-sizing: border-box;
+		overflow-x: hidden;
+		position: relative;
 	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
+	@media only screen and (min-width: 780px) {
 		main {
-			max-width: none;
+		padding-left: calc(15vw - 78px - 39px);
+		padding-right: calc(15vw - 78px - 39px);
 		}
 	}
 </style>
