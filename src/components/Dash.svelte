@@ -18,7 +18,7 @@
   $: {
     if ($_widgetsCount !== widgets.length || $_activeDashIndex !== prevDashIndex) {
       prevDashIndex = $_activeDashIndex;
-      widgets = Array.from(dashboards[$_activeDashIndex].widgets.keys());
+      widgets = dashboards[$_activeDashIndex] ? Array.from(dashboards[$_activeDashIndex].widgets.keys()) : [];
       itemsArr = generateGridItems(widgets, cols);
     }
   } 
