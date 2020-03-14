@@ -17,7 +17,6 @@
 
   onMount(() => {
     let observer = new IntersectionObserver(entries => {
-      console.log(entries[0])
       if (entries[0].isIntersecting) {
         document.body.classList.add("header-not-at-top");
         isAtBottom = true;
